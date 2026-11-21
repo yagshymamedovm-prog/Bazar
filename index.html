@@ -320,6 +320,11 @@
     .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
     .partner-hint{margin-top:16px;text-align:center;font-size:11.5px;color:var(--sub)}
     .partner-hint a{color:var(--accent2);font-weight:800;text-decoration:none}
+  
+    .product-thumb img,.pd-thumb img,.cart-emoji img,.sc-emoji img,.sh-avatar img{width:100%;height:100%;object-fit:cover;display:block}
+    .product-thumb.has-img,.pd-thumb.has-img{padding:0}
+    .sc-emoji,.sh-avatar,.cart-emoji{overflow:hidden}
+    .sc-cover.has-cover,.sh-cover.has-cover{background-size:cover!important;background-position:center!important}
   </style>
 </head>
 <body>
@@ -413,8 +418,8 @@
       // boş goýsaňyz dukan.html bilen şu brauzerde dessine sinhr. işlär!)
       // ============================================================
       const CONFIG = {
-        SUPABASE_URL: 'https://zkypuqmwovjuuplirzig.supabase.co/rest/v1/',      // Mysal: 'https://xxxx.supabase.co'
-        SUPABASE_ANON_KEY: 'sb_publishable_Rhlt7E7dYumty3PpE6Sp6Q_AzkHOp-l', // Mysal: 'eyJhbGci...'
+        SUPABASE_URL: 'https://zkypuqmwovjuuplirzig.supabase.co',
+        SUPABASE_ANON_KEY: 'sb_publishable_Rhlt7E7dYumty3PpE6Sp6Q_AzkHOp-l',
         currency: 'm.'
       };
 
@@ -584,11 +589,26 @@
             sb.from('stores').select('*'),
             sb.from('products').select('*')
           ]);
-          if (sRes.data && sRes.data.length) STORES = sRes.data;
-          if (pRes.data && pRes.data.length) PRODUCTS = pRes.data;
+          if (sRes.data && sRes.data.length) STORES = sRes.data.map(r => ({
+            id:r.id, name:r.name, type:r.type || 'shop', emoji:r.emoji || '🏪', desc:r.desc || '',
+            cats:r.cats || [], grad:r.grad, soft:r.soft || '#f1f5f9', eta:r.eta || '30–45 min',
+            rating:r.rating || '4.8', hours:r.hours || '09:00–22:00', isOpen:r.is_open !== false,
+            phone:r.phone || '', logoUrl:r.logo_url || '', coverUrl:r.cover_url || ''
+          }));
+          if (pRes.data && pRes.data.length) PRODUCTS = pRes.data.map(r => ({
+            id:r.id, storeId:r.store_id, cat:r.cat || 'Esasy', title:r.title, unit:r.unit || '1 sany',
+            price:Number(r.price), oldPrice:r.old_price ? Number(r.old_price) : null,
+            emoji:r.emoji || '📦', deal:!!r.deal, inStock:r.in_stock !== false,
+            desc:r.desc || '', imageUrl:r.image_url || ''
+          }));
           if (state.myOrderCodes.length) {
             const oRes = await sb.from('orders').select('*').in('code', state.myOrderCodes).order('created_at', { ascending:false });
-            if (oRes.data) ALL_ORDERS = oRes.data;
+            if (oRes.data) ALL_ORDERS = oRes.data.map(r => ({
+              code:r.code, storeId:r.store_id, storeName:r.store_name, status:r.status,
+              createdAt:new Date(r.created_at).getTime(), customerName:r.customer_name,
+              customerPhone:r.customer_phone, address:r.address, note:r.note, pay:r.pay_method,
+              items:r.items, total:r.total, count:r.count
+            }));
           }
           rebuildIndexes();
           renderView(false);
@@ -644,7 +664,7 @@
       }
       function go(v, id) { stack.push({ v: state.view, id: state.activeId }); setView(v, id); }
       function back() { const p = stack.pop(); if (p) setView(p.v, p.id); else setView('home'); }
-      function goTab(tab) { stack = []; state.checkoutStoreId = null; setView(tab); }
+      function goTab(tab) { stack = []; state.checkoutStoreId = null; setView(tab); if (tab === 'orders' || tab === 'home' || tab === 'stores') syncFromSupabase(); }
 
       function updateTopAddr() {
         $('topAddrText').textContent = state.customer.address || 'Salgyňyzy saýlaň';
@@ -660,8 +680,8 @@
           ? '<span class="sc-status"><span class="live-dot" style="width:6px;height:6px;"></span>Açyk</span>'
           : '<span class="sc-status closed">● Ýapyk</span>';
         return '<div class="store-card" data-open-store="' + s.id + '">' +
-          '<div class="sc-cover" style="background:' + (s.grad || 'var(--grad)') + ';">' +
-            '<span class="sc-emoji">' + s.emoji + '</span>' +
+          '<div class="sc-cover' + (s.coverUrl ? ' has-cover' : '') + '" style="background:' + (s.coverUrl ? 'url(' + esc(s.coverUrl) + ')' : (s.grad || 'var(--grad)')) + ';">' +
+            '<span class="sc-emoji">' + (s.logoUrl ? '<img src="' + esc(s.logoUrl) + '" alt="" />' : s.emoji) + '</span>' +
             '<div class="sc-top-right">' + openBadge +
               '<button type="button" class="fav-btn" data-fav="' + s.id + '">' + (fav ? '❤️' : '🤍') + '</button>' +
             '</div>' +
@@ -692,7 +712,7 @@
 
         return '<article class="product-card">' +
           '<div class="product-click" data-open-prod="' + p.id + '">' +
-            '<div class="product-thumb" style="background:linear-gradient(155deg,' + st.soft + ',#f8fafc);">' + tag + p.emoji + '</div>' +
+            '<div class="product-thumb' + (p.imageUrl ? ' has-img' : '') + '" style="background:linear-gradient(155deg,' + st.soft + ',#f8fafc);">' + tag + (p.imageUrl ? '<img src="' + esc(p.imageUrl) + '" alt="" />' : p.emoji) + '</div>' +
             src +
             '<div class="product-title">' + esc(p.title) + '</div>' +
             '<div class="product-unit">' + esc(p.unit) + '</div>' +
@@ -810,11 +830,11 @@
 
         return '<div class="fade-in">' +
           '<div class="store-hero">' +
-            '<div class="sh-cover" style="background:' + (s.grad || 'var(--grad)') + ';">' +
+            '<div class="sh-cover' + (s.coverUrl ? ' has-cover' : '') + '" style="background:' + (s.coverUrl ? 'url(' + esc(s.coverUrl) + ')' : (s.grad || 'var(--grad)')) + ';">' +
               '<button type="button" class="back-btn" style="background:rgba(255,255,255,.92);" data-back="true">← Yza</button>' +
               '<button type="button" class="fav-btn" data-fav="' + s.id + '" style="width:36px;height:36px;font-size:17px;">' + (fav ? '❤️' : '🤍') + '</button>' +
             '</div>' +
-            '<div class="sh-avatar">' + s.emoji + '</div>' +
+            '<div class="sh-avatar">' + (s.logoUrl ? '<img src="' + esc(s.logoUrl) + '" alt="" />' : s.emoji) + '</div>' +
             '<div class="sh-body">' +
               '<div class="sh-name">' + esc(s.name) + '</div>' +
               '<div style="font-size:12.5px;color:var(--sub);">' + esc(s.desc) + '</div>' +
@@ -861,7 +881,7 @@
               '<div class="cg-head" data-open-store="' + g.store.id + '"><span class="cg-emoji" style="background:' + g.store.soft + ';">' + g.store.emoji + '</span><span class="cg-name">' + esc(g.store.name) + '</span><strong>' + fmt(g.total) + '</strong></div>' +
               g.items.map(it =>
                 '<div class="cart-item">' +
-                  '<div class="cart-emoji" style="background:' + g.store.soft + ';">' + it.p.emoji + '</div>' +
+                  '<div class="cart-emoji" style="background:' + g.store.soft + ';">' + (it.p.imageUrl ? '<img src="' + esc(it.p.imageUrl) + '" alt="" />' : it.p.emoji) + '</div>' +
                   '<div class="cart-info"><div class="cart-title">' + esc(it.p.title) + '</div><div class="cart-price-line">' + esc(it.p.unit) + ' • <strong>' + fmt(it.p.price * it.qty) + '</strong></div></div>' +
                   '<div class="stepper"><button type="button" class="step-btn" data-dec="' + it.p.id + '">−</button><span class="step-qty">' + it.qty + '</span><button type="button" class="step-btn plus" data-inc="' + it.p.id + '">+</button></div>' +
                 '</div>'
@@ -1061,7 +1081,7 @@
 
         $('productSheetBody').innerHTML =
           '<div class="sheet-handle"></div>' +
-          '<div class="pd-thumb" style="background:linear-gradient(155deg,' + s.soft + ',#f8fafc);">' + p.emoji + '</div>' +
+          '<div class="pd-thumb' + (p.imageUrl ? ' has-img' : '') + '" style="background:linear-gradient(155deg,' + s.soft + ',#f8fafc);">' + (p.imageUrl ? '<img src="' + esc(p.imageUrl) + '" alt="" />' : p.emoji) + '</div>' +
           '<div><h3 style="font-size:19px;font-weight:800;">' + esc(p.title) + '</h3><div style="font-size:12px;color:var(--sub);margin-top:2px;">' + esc(p.unit) + '</div></div>' +
           '<p style="font-size:13px;color:var(--sub);line-height:1.45;">' + esc(p.desc || 'Täze we ýokary hilli.') + '</p>' +
           '<div style="display:flex;align-items:center;justify-content:space-between;background:var(--soft);padding:10px 12px;border-radius:14px;cursor:pointer;" data-sheet-store="' + s.id + '">' +

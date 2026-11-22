@@ -1,0 +1,1536 @@
+<!DOCTYPE html>
+<html lang="tk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1120" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="ŞäherMarket" />
+  <title>ŞäherMarket — Şäheriň ähli dükanlary we tagamlary</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#f4f6fb; --card:#ffffff; --soft:#eef2f7; --dark:#0b1120; --dark2:#131c31;
+      --ink:#0f172a; --sub:#64748b; --border:rgba(15,23,42,.08);
+      --accent:#10b981; --accent2:#059669; --accent-soft:#ecfdf5;
+      --orange:#f97316; --pink:#ec4899; --violet:#7c3aed; --danger:#ef4444; --star:#f59e0b;
+      --grad:linear-gradient(135deg,#10b981 0%,#0d9488 50%,#0284c7 100%);
+      --grad-hot:linear-gradient(135deg,#f97316 0%,#ec4899 100%);
+      --r:20px; --nav-h:68px;
+      --sh-sm:0 4px 14px rgba(15,23,42,.05);
+      --sh-md:0 12px 30px rgba(15,23,42,.10);
+      --sh-glow:0 12px 28px rgba(16,185,129,.32);
+    }
+    *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+    html,body{min-height:100%;background:radial-gradient(circle at top left,#1e293b,#0b1120 60%);
+      color:var(--ink);font-family:"Plus Jakarta Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+      font-size:14px;line-height:1.38;-webkit-font-smoothing:antialiased}
+    button,input,textarea,select{font-family:inherit;color:inherit}
+
+    .app-shell{width:100%;max-width:460px;min-height:100vh;margin:0 auto;background:var(--bg);
+      display:flex;flex-direction:column;position:relative;box-shadow:0 0 60px rgba(0,0,0,.45)}
+    .app-main{flex:1;padding:12px 14px calc(var(--nav-h) + env(safe-area-inset-bottom) + 92px);overflow-x:hidden}
+    .fade-in{animation:rise .28s cubic-bezier(.2,.8,.2,1) both}
+    @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+    @keyframes floaty{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-6px) rotate(3deg)}}
+    @keyframes pulseDot{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.5);opacity:.4}}
+    @keyframes pop{0%{transform:scale(1)}45%{transform:scale(1.22)}100%{transform:scale(1)}}
+
+    /* ===== TOP BAR ===== */
+    .top-bar{position:sticky;top:0;z-index:30;background:rgba(255,255,255,.86);
+      backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+      border-bottom:1px solid var(--border);padding:10px 14px 12px;display:flex;flex-direction:column;gap:9px}
+    .top-row{display:flex;align-items:center;justify-content:space-between;gap:6px}
+    .brand{display:flex;align-items:center;gap:7px;cursor:pointer;flex-shrink:0}
+    .brand-logo{width:32px;height:32px;border-radius:10px;background:var(--grad);color:#fff;
+      display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;
+      box-shadow:0 6px 14px rgba(16,185,129,.35)}
+    .brand-text{font-size:16px;font-weight:800;letter-spacing:-.5px}
+    .brand-text span{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+    .top-right{display:flex;align-items:center;gap:6px;min-width:0;flex:1;justify-content:flex-end}
+    .addr-pill{max-width:155px;display:flex;align-items:center;gap:4px;border:1px solid var(--border);
+      background:#fff;border-radius:999px;padding:5px 9px;font-size:11px;font-weight:700;
+      cursor:pointer;box-shadow:var(--sh-sm)}
+    .addr-pill span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .lang-btn{border:1px solid var(--border);background:var(--soft);border-radius:999px;padding:5px 8px;
+      font-size:10.5px;font-weight:800;cursor:pointer;flex-shrink:0}
+
+    .search-box{position:relative;display:flex;align-items:center}
+    .search-icon{position:absolute;left:13px;font-size:14px;color:var(--sub);pointer-events:none}
+    .search-input{width:100%;height:42px;padding:0 36px 0 38px;border-radius:14px;border:1.5px solid transparent;
+      background:var(--soft);font-size:13px;font-weight:600;color:var(--ink);outline:none;transition:.18s}
+    .search-input:focus{background:#fff;border-color:var(--accent);box-shadow:0 0 0 4px rgba(16,185,129,.12)}
+    .search-clear{position:absolute;right:8px;width:26px;height:26px;border:none;background:#e2e8f0;
+      color:var(--ink);font-size:12px;font-weight:800;cursor:pointer;display:none;align-items:center;
+      justify-content:center;border-radius:50%}
+    .search-clear.visible{display:flex}
+
+    /* ===== HERO BANNER ===== */
+    .hero{position:relative;overflow:hidden;border-radius:24px;padding:20px 18px;color:#fff;
+      background:radial-gradient(circle at 85% 15%,#14b8a6 0%,transparent 45%),
+                 radial-gradient(circle at 15% 95%,#6366f1 0%,transparent 50%),
+                 linear-gradient(135deg,#0b1120 0%,#0f172a 60%,#064e3b 100%);
+      box-shadow:0 18px 38px rgba(11,17,32,.26);margin-bottom:14px}
+    .hero-live{display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:700;
+      background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);
+      backdrop-filter:blur(8px);padding:5px 11px;border-radius:999px;margin-bottom:10px}
+    .live-dot{width:7px;height:7px;border-radius:50%;background:#34d399;animation:pulseDot 1.6s infinite}
+    .hero h1{font-size:21px;font-weight:800;letter-spacing:-.6px;line-height:1.18;max-width:78%;position:relative;z-index:2}
+    .hero h1 span{background:linear-gradient(90deg,#34d399,#38bdf8);-webkit-background-clip:text;background-clip:text;color:transparent}
+    .hero p{font-size:12px;color:rgba(255,255,255,.8);margin-top:6px;max-width:76%;position:relative;z-index:2}
+    .hero-floats{position:absolute;right:12px;top:18px;display:flex;flex-direction:column;gap:8px;z-index:1;pointer-events:none}
+    .hf-orb{width:44px;height:44px;border-radius:14px;background:rgba(255,255,255,.13);
+      border:1px solid rgba(255,255,255,.22);backdrop-filter:blur(8px);
+      display:flex;align-items:center;justify-content:center;font-size:22px;animation:floaty 3.2s ease-in-out infinite}
+    .hf-orb:nth-child(2){margin-left:-16px;animation-delay:.6s}
+    .hf-orb:nth-child(3){animation-delay:1.2s}
+    .hero-cta-row{display:flex;gap:8px;margin-top:14px;position:relative;z-index:2}
+    .hero-btn{border:none;border-radius:12px;padding:9px 14px;font-size:12px;font-weight:800;cursor:pointer;
+      background:#fff;color:var(--dark);box-shadow:0 6px 16px rgba(0,0,0,.18)}
+    .hero-btn.ghost{background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.22);box-shadow:none}
+
+    /* ===== PROMO BANNER ===== */
+    .promo-bar{background:linear-gradient(135deg,#fff7ed,#fce7f3);border:1px solid rgba(249,115,22,.22);
+      border-radius:16px;padding:10px 13px;display:flex;align-items:center;justify-content:space-between;gap:10px;
+      margin-bottom:14px;cursor:pointer}
+    .promo-code{background:var(--dark);color:#fff;font-size:11px;font-weight:800;padding:5px 10px;border-radius:9px;letter-spacing:.5px}
+
+    /* ===== BENTO ===== */
+    .bento-modes{display:grid;grid-template-columns:1.15fr 1fr;gap:10px;margin-bottom:14px}
+    .bento-big{border-radius:20px;padding:14px;color:#fff;cursor:pointer;position:relative;overflow:hidden;
+      background:linear-gradient(135deg,#f97316,#ea580c 55%,#be123c);
+      box-shadow:0 12px 24px rgba(234,88,12,.25);display:flex;flex-direction:column;justify-content:space-between;min-height:114px;border:none;text-align:left}
+    .bento-stack{display:flex;flex-direction:column;gap:10px}
+    .bento-sm{flex:1;border-radius:18px;padding:11px 13px;color:#fff;cursor:pointer;border:none;text-align:left;
+      display:flex;align-items:center;justify-content:space-between}
+    .bento-sm.market{background:linear-gradient(135deg,#10b981,#047857)}
+    .bento-sm.shop{background:linear-gradient(135deg,#6366f1,#4338ca)}
+    .bm-title{font-size:14px;font-weight:800}
+    .bm-sub{font-size:10.5px;opacity:.9;font-weight:600;margin-top:2px}
+    .bm-emoji{font-size:26px}
+    .bento-big .bm-emoji{position:absolute;right:10px;bottom:8px;font-size:40px}
+
+    /* ===== SECTIONS & LISTS ===== */
+    .section-head{display:flex;align-items:center;justify-content:space-between;margin:16px 2px 10px}
+    .section-title{font-size:16px;font-weight:800;letter-spacing:-.3px}
+    .section-link{border:none;background:var(--accent-soft);color:var(--accent2);font-size:11.5px;font-weight:800;
+      padding:5px 11px;border-radius:999px;cursor:pointer}
+
+    .dept-scroll{display:flex;gap:10px;overflow-x:auto;padding:2px 2px 8px;scrollbar-width:none}
+    .dept-scroll::-webkit-scrollbar{display:none}
+    .dept-story{min-width:74px;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;border:none;background:none}
+    .dept-ring{width:58px;height:58px;border-radius:19px;padding:3px;display:flex;align-items:center;justify-content:center;
+      background:#fff;box-shadow:var(--sh-sm);border:2px solid transparent}
+    .dept-inner{width:100%;height:100%;border-radius:15px;display:flex;align-items:center;justify-content:center;font-size:25px}
+    .dept-lbl{font-size:10.5px;font-weight:700;text-align:center;line-height:1.15;max-width:74px}
+
+    .h-scroll{display:flex;gap:11px;overflow-x:auto;padding:2px 2px 10px;scroll-snap-type:x mandatory;scrollbar-width:none}
+    .h-scroll::-webkit-scrollbar{display:none}
+    .h-scroll .product-card{min-width:162px;max-width:162px;scroll-snap-align:start}
+    .h-scroll .store-card{min-width:244px;max-width:244px;scroll-snap-align:start}
+
+    .products-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:11px}
+    .product-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);
+      padding:10px;display:flex;flex-direction:column;justify-content:space-between;gap:7px;
+      box-shadow:var(--sh-sm);position:relative}
+    .product-click{cursor:pointer}
+    .product-thumb{height:92px;border-radius:15px;display:flex;align-items:center;justify-content:center;
+      font-size:42px;user-select:none;position:relative;overflow:hidden}
+    .product-thumb img,.pd-thumb img,.cart-emoji img,.sc-emoji img,.sh-avatar img{width:100%;height:100%;object-fit:cover;display:block}
+    .product-tag{position:absolute;top:7px;left:7px;z-index:2;font-size:9.5px;font-weight:800;padding:3px 7px;
+      border-radius:999px;background:var(--grad-hot);color:#fff}
+    .opt-badge{position:absolute;bottom:6px;right:6px;z-index:2;font-size:9px;font-weight:800;padding:2px 6px;
+      border-radius:999px;background:rgba(11,17,32,.78);color:#fff}
+    .product-source{font-size:10px;font-weight:700;color:var(--sub);margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .product-title{font-size:13px;font-weight:800;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:32px;margin-top:3px}
+    .product-unit{font-size:11px;color:var(--sub);font-weight:600}
+    .product-bottom{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-top:3px}
+    .old-price{font-size:10px;color:var(--sub);text-decoration:line-through;font-weight:600}
+    .product-price{font-size:15px;font-weight:800;white-space:nowrap}
+    .add-btn{width:36px;height:36px;border-radius:12px;border:none;background:var(--dark);color:#fff;
+      font-size:20px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .stepper{display:inline-flex;align-items:center;background:var(--dark);color:#fff;
+      border-radius:12px;height:36px;padding:0 3px;gap:2px;flex-shrink:0}
+    .step-btn{width:28px;height:28px;border:none;border-radius:9px;background:rgba(255,255,255,.14);color:#fff;
+      font-size:15px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center}
+    .step-btn.plus{background:var(--accent)}
+    .step-qty{min-width:20px;text-align:center;font-size:12.5px;font-weight:800}
+
+    /* ===== STORE CARDS ===== */
+    .stores-grid{display:grid;grid-template-columns:1fr;gap:11px}
+    .store-card{background:var(--card);border:1px solid var(--border);border-radius:22px;
+      overflow:hidden;cursor:pointer;text-align:left;box-shadow:var(--sh-sm);display:flex;flex-direction:column;position:relative}
+    .sc-cover{height:78px;position:relative;display:flex;align-items:flex-end;justify-content:space-between;padding:10px 12px;background-size:cover!important;background-position:center!important}
+    .sc-emoji{width:48px;height:48px;border-radius:16px;background:#fff;box-shadow:0 8px 18px rgba(15,23,42,.12);
+      display:flex;align-items:center;justify-content:center;font-size:25px;transform:translateY(18px);overflow:hidden}
+    .sc-top-right{position:absolute;top:10px;right:10px;display:flex;align-items:center;gap:6px}
+    .sc-status{font-size:10px;font-weight:800;padding:4px 9px;border-radius:999px;background:rgba(255,255,255,.94);color:#059669;display:inline-flex;align-items:center;gap:4px}
+    .sc-status.closed{color:#dc2626}
+    .fav-btn{width:30px;height:30px;border-radius:50%;border:none;background:rgba(255,255,255,.94);display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer}
+    .sc-body{padding:22px 13px 13px;display:flex;flex-direction:column;gap:5px;flex:1}
+    .sc-head-line{display:flex;align-items:center;justify-content:space-between;gap:8px}
+    .sc-name{font-size:15px;font-weight:800}
+    .sc-rating{font-size:11px;font-weight:800;color:#b45309;background:#fef3c7;padding:3px 8px;border-radius:999px;white-space:nowrap}
+    .sc-desc{font-size:11.5px;color:var(--sub);line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+    .sc-foot{display:flex;align-items:center;gap:6px;margin-top:4px;font-size:10.5px;font-weight:700;color:var(--sub);flex-wrap:wrap}
+    .sc-pill{padding:3px 8px;border-radius:999px;background:var(--soft);color:var(--ink)}
+
+    /* ===== CHIPS, SUB HEADER, STORE HERO ===== */
+    .chips{display:flex;gap:7px;overflow-x:auto;padding-bottom:8px;margin-bottom:6px;scrollbar-width:none}
+    .chips::-webkit-scrollbar{display:none}
+    .chip{border:1px solid var(--border);background:#fff;border-radius:999px;padding:8px 13px;
+      font-size:12px;font-weight:700;color:var(--sub);white-space:nowrap;cursor:pointer;flex-shrink:0}
+    .chip.active{background:var(--dark);border-color:var(--dark);color:#fff}
+    .sub-header{background:#fff;border:1px solid var(--border);border-radius:18px;
+      padding:10px 12px;margin-bottom:12px;display:flex;align-items:center;gap:10px;box-shadow:var(--sh-sm)}
+    .back-btn{border:none;background:var(--soft);font-size:12px;font-weight:800;padding:8px 12px;border-radius:12px;cursor:pointer;flex-shrink:0}
+    .store-hero{background:#fff;border:1px solid var(--border);border-radius:24px;overflow:hidden;box-shadow:var(--sh-sm);margin-bottom:12px;position:relative}
+    .sh-cover{height:105px;padding:12px;display:flex;align-items:flex-start;justify-content:space-between;background-size:cover!important;background-position:center!important}
+    .sh-avatar{position:absolute;left:16px;top:68px;width:64px;height:64px;border-radius:20px;background:#fff;box-shadow:var(--sh-md);
+      display:flex;align-items:center;justify-content:center;font-size:34px;overflow:hidden}
+    .sh-body{padding:40px 16px 16px;display:flex;flex-direction:column;gap:7px}
+    .sh-stats{display:flex;flex-wrap:wrap;gap:6px}
+    .sh-stat{font-size:11px;font-weight:700;padding:5px 10px;border-radius:999px;background:var(--soft)}
+    .sh-stat.open{background:#dcfce7;color:#15803d}
+    .sh-stat.closed{background:#fee2e2;color:#dc2626}
+    .store-search{width:100%;height:40px;padding:0 14px;border-radius:13px;border:1.5px solid var(--border);background:#fff;font-size:13px;font-weight:600;outline:none;margin-bottom:10px}
+
+    /* ===== REVIEWS ===== */
+    .review-card{background:#fff;border:1px solid var(--border);border-radius:16px;padding:12px;margin-bottom:8px}
+    .review-reply{margin-top:8px;background:var(--accent-soft);border-left:3px solid var(--accent);padding:8px 10px;border-radius:8px;font-size:12px}
+
+    /* ===== CART, COUPON & PROGRESS ===== */
+    .float-cart{position:fixed;left:50%;transform:translateX(-50%);
+      bottom:calc(var(--nav-h) + env(safe-area-inset-bottom) + 12px);
+      width:calc(100% - 28px);max-width:432px;z-index:29;
+      background:var(--dark);color:#fff;border:none;border-radius:18px;padding:13px 16px;
+      display:none;align-items:center;justify-content:space-between;gap:10px;box-shadow:0 14px 30px rgba(11,17,32,.36);cursor:pointer}
+    .float-cart.visible{display:flex;animation:rise .25s ease}
+    .fc-badge{background:var(--accent);color:#fff;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:800}
+
+    .cart-group{background:#fff;border:1px solid var(--border);border-radius:20px;overflow:hidden;box-shadow:var(--sh-sm);margin-bottom:12px}
+    .cg-head{display:flex;align-items:center;gap:10px;padding:12px 14px;background:#f8fafc;border-bottom:1px solid var(--border);cursor:pointer}
+    .cg-emoji{width:34px;height:34px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:19px;overflow:hidden}
+    .free-bar-wrap{padding:8px 14px;background:#f0fdf4;border-bottom:1px solid #dcfce7;font-size:11.5px;font-weight:700;color:#15803d}
+    .free-bar{height:5px;background:#bbf7d0;border-radius:999px;margin-top:5px;overflow:hidden}
+    .free-bar-fill{height:100%;background:var(--accent);border-radius:999px;transition:.3s}
+    .min-warn{padding:8px 14px;background:#fef2f2;color:#dc2626;font-size:11.5px;font-weight:700;border-bottom:1px solid #fee2e2}
+    .cart-item{display:flex;align-items:center;gap:11px;padding:11px 14px;border-bottom:1px solid var(--soft)}
+    .cart-item:last-of-type{border-bottom:none}
+    .cart-emoji{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;overflow:hidden}
+    .cart-info{flex:1;min-width:0}
+    .cart-title{font-size:13px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .cart-opts{font-size:10.5px;color:var(--accent2);font-weight:700;margin-top:1px}
+    .cart-price-line{font-size:11.5px;color:var(--sub);margin-top:2px}
+    .coupon-row{display:flex;gap:8px}
+    .coupon-row input{flex:1;border:1.5px solid var(--border);border-radius:12px;padding:10px 12px;font-size:13px;font-weight:700;text-transform:uppercase;outline:none}
+    .coupon-row button{border:none;background:var(--dark);color:#fff;border-radius:12px;padding:0 16px;font-size:12.5px;font-weight:800;cursor:pointer}
+
+    .summary-card,.form-card{background:#fff;border:1px solid var(--border);border-radius:22px;padding:16px;display:flex;flex-direction:column;gap:11px;box-shadow:var(--sh-sm);margin-bottom:12px}
+    .summary-row{display:flex;align-items:center;justify-content:space-between;font-size:14px;font-weight:600}
+    .summary-total{font-size:21px;font-weight:800}
+    .checkout-btn{width:100%;height:50px;border:none;border-radius:15px;background:var(--grad);color:#fff;font-size:14.5px;font-weight:800;cursor:pointer;box-shadow:var(--sh-glow)}
+    .checkout-btn:disabled{opacity:.5;cursor:not-allowed}
+
+    .field label{font-size:12px;font-weight:800;margin-bottom:5px;display:block}
+    .field input,.field textarea,.field select{width:100%;border:1.5px solid var(--border);border-radius:13px;background:#f8fafc;padding:11px;font-size:14px;font-weight:600;outline:none}
+    .field input:focus,.field textarea:focus,.field select:focus{border-color:var(--accent);background:#fff}
+    .field .err{display:none;font-size:11px;color:var(--danger);margin-top:4px;font-weight:700}
+    .field.invalid input,.field.invalid textarea{border-color:var(--danger)}
+    .field.invalid .err{display:block}
+    .pay-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .pay-opt{border:1.5px solid var(--border);background:#f8fafc;border-radius:13px;padding:11px 8px;font-size:12.5px;font-weight:800;cursor:pointer;text-align:center}
+    .pay-opt.active{border-color:var(--accent);background:var(--accent-soft);color:var(--accent2)}
+    .gps-btn{border:1.5px dashed var(--accent);background:var(--accent-soft);color:var(--accent2);border-radius:12px;padding:10px;font-size:12.5px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
+
+    /* ===== OPTIONS PICKER ===== */
+    .opt-list{display:flex;flex-direction:column;gap:7px}
+    .opt-row{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:13px;border:1.5px solid var(--border);background:#f8fafc;cursor:pointer;font-size:13px;font-weight:700}
+    .opt-row.selected{border-color:var(--accent);background:var(--accent-soft);color:var(--accent2)}
+
+    /* ===== ORDERS & RATING ===== */
+    .order-card{background:#fff;border:1px solid var(--border);border-radius:22px;padding:14px;display:flex;flex-direction:column;gap:10px;margin-bottom:12px;box-shadow:var(--sh-sm)}
+    .order-head{display:flex;align-items:center;gap:10px}
+    .order-emoji{width:40px;height:40px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:21px}
+    .order-status-pill{font-size:10.5px;font-weight:800;padding:4px 10px;border-radius:999px;white-space:nowrap}
+    .st-new{background:#dbeafe;color:#1d4ed8}
+    .st-accepted{background:#fef3c7;color:#b45309}
+    .st-preparing{background:#ffedd5;color:#c2410c}
+    .st-onway{background:#ede9fe;color:#6d28d9}
+    .st-delivered{background:#dcfce7;color:#15803d}
+    .st-cancelled{background:#fee2e2;color:#dc2626}
+    .track-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
+    .track-seg{height:5px;border-radius:999px;background:#e2e8f0}
+    .track-seg.done{background:var(--accent)}
+    .track-seg.active{background:var(--orange)}
+    .order-items-box{background:var(--soft);border-radius:12px;padding:9px 11px;font-size:12px;line-height:1.45}
+    .order-btns{display:flex;gap:8px}
+    .oa-btn{flex:1;height:38px;border-radius:12px;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;gap:5px;cursor:pointer;border:1px solid var(--border);background:var(--soft);text-decoration:none}
+    .oa-btn.dark{background:var(--dark);color:#fff;border-color:var(--dark)}
+    .oa-btn.star{background:#fef3c7;color:#b45309;border-color:#fde68a}
+    .stars-pick{display:flex;justify-content:center;gap:8px;font-size:34px;margin:6px 0}
+    .stars-pick button{border:none;background:none;font-size:34px;cursor:pointer;opacity:.3;transition:.15s}
+    .stars-pick button.on{opacity:1;transform:scale(1.1)}
+
+    /* ===== SAVED ADDRESSES ===== */
+    .addr-card{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 13px;border-radius:14px;border:1.5px solid var(--border);background:#f8fafc;cursor:pointer}
+    .addr-card.active{border-color:var(--accent);background:var(--accent-soft)}
+
+    /* ===== BOTTOM NAV & SHEETS ===== */
+    .bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:460px;
+      height:calc(var(--nav-h) + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);
+      background:rgba(255,255,255,.94);backdrop-filter:blur(16px);border-top:1px solid var(--border);
+      display:grid;grid-template-columns:repeat(5,1fr);z-index:35}
+    .nav-btn{border:none;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;color:var(--sub);font-size:10px;font-weight:700}
+    .nav-btn.active{color:var(--dark)}
+    .nav-icon-wrap{position:relative;font-size:20px;line-height:1}
+    .nav-badge{position:absolute;top:-6px;right:-11px;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:var(--danger);color:#fff;font-size:10px;font-weight:800;display:none;align-items:center;justify-content:center}
+    .nav-badge.visible{display:flex;animation:pop .25s ease}
+
+    .sheet-overlay{position:fixed;inset:0;background:rgba(11,17,32,.62);backdrop-filter:blur(4px);display:none;align-items:flex-end;justify-content:center;z-index:60}
+    .sheet-overlay.open{display:flex}
+    .sheet-card{width:100%;max-width:460px;background:#fff;border-radius:26px 26px 0 0;
+      padding:12px 18px calc(20px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:12px;max-height:88vh;overflow:auto;animation:rise .24s ease}
+    .sheet-handle{width:44px;height:5px;border-radius:999px;background:#e2e8f0;margin:0 auto 4px}
+    .pd-thumb{height:152px;border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:72px;overflow:hidden}
+    .empty-box{background:#fff;border:1px solid var(--border);border-radius:22px;padding:34px 18px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:9px;box-shadow:var(--sh-sm)}
+    .primary-small-btn{margin-top:6px;border:none;background:var(--dark);color:#fff;font-size:13px;font-weight:800;padding:11px 20px;border-radius:14px;cursor:pointer}
+    .toast{position:fixed;left:50%;transform:translateX(-50%) translateY(10px);bottom:calc(var(--nav-h) + env(safe-area-inset-bottom) + 72px);
+      background:var(--dark);color:#fff;font-size:12.5px;font-weight:700;padding:11px 18px;border-radius:999px;opacity:0;pointer-events:none;transition:.2s;z-index:80;box-shadow:var(--sh-md);white-space:nowrap}
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  
+    body.dark{--bg:#080d18;--card:#111a2e;--soft:#19253f;--ink:#f8fafc;--sub:#94a3b8;--border:rgba(148,163,184,.14)}
+    body.dark .top-bar,body.dark .bottom-nav{background:rgba(11,17,32,.92)}
+    body.dark .addr-pill,body.dark .chip,body.dark .sub-header,body.dark .store-hero,body.dark .cart-group,body.dark .summary-card,body.dark .form-card,body.dark .order-card,body.dark .sheet-card,body.dark .empty-box,body.dark .review-card{background:var(--card);color:var(--ink)}
+    body.dark .field input,body.dark .field textarea,body.dark .field select,body.dark .store-search{background:#0b1120;color:#fff}
+    .icon-pill{border:1px solid var(--border);background:var(--soft);border-radius:999px;width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer;flex-shrink:0}
+    .voice-btn{position:absolute;right:34px;border:none;background:none;font-size:15px;cursor:pointer;padding:4px}
+    .quick-strip{display:flex;gap:7px;overflow-x:auto;padding-bottom:6px;margin-bottom:10px;scrollbar-width:none}
+    .quick-strip::-webkit-scrollbar{display:none}
+    .q-pill{border:1px solid var(--border);background:var(--card);border-radius:999px;padding:6px 11px;font-size:11.5px;font-weight:800;white-space:nowrap;cursor:pointer;display:inline-flex;align-items:center;gap:5px}
+    .q-pill.on{background:var(--dark);color:#fff;border-color:var(--dark)}
+    .repeat-widget{background:linear-gradient(135deg,#0f172a,#1e293b);color:#fff;border-radius:18px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+    .ann-banner{background:#fef3c7;color:#92400e;border:1px solid #fde68a;border-radius:12px;padding:8px 11px;font-size:12px;font-weight:800;margin-bottom:10px}
+    .wallet-bar{background:linear-gradient(135deg,#ecfdf5,#e0f2fe);border:1px solid #a7f3d0;border-radius:14px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;font-size:12px;font-weight:800;color:#065f46;margin-bottom:12px}
+    .gram-row{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:6px}
+    .gram-btn{border:1.5px solid var(--border);background:var(--soft);border-radius:10px;padding:7px 4px;font-size:11.5px;font-weight:800;cursor:pointer;text-align:center}
+    .gram-btn.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent2)}
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="top-bar">
+      <div class="top-row">
+        <div class="brand" id="brandHomeBtn">
+          <div class="brand-logo">Ş</div>
+          <div class="brand-text">Şäher<span>Market</span></div>
+        </div>
+        <div class="top-right">
+          <button type="button" class="addr-pill" id="topAddrBtn">📍 <span id="topAddrText">Salgy</span></button>
+          <button type="button" class="icon-pill" id="themeBtn" title="Tema">🌙</button><button type="button" class="lang-btn" id="langBtn">TK</button>
+        </div>
+      </div>
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" class="search-input" autocomplete="off" />
+        <button type="button" id="voiceBtn" class="voice-btn" title="Sesli gözleg">🎙️</button><button type="button" id="searchClearBtn" class="search-clear">✕</button>
+      </div>
+    </header>
+
+    <main class="app-main" id="appView"></main>
+
+    <button type="button" class="float-cart" id="floatCartBtn">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span class="fc-badge" id="fcCount">0</span>
+        <span style="font-size:13.5px;font-weight:800;" id="fcText">Sebete geç</span>
+      </div>
+      <span style="font-size:14.5px;font-weight:800;" id="fcTotal">0 m. →</span>
+    </button>
+
+    <nav class="bottom-nav">
+      <button type="button" class="nav-btn active" data-tab="home"><span class="nav-icon-wrap">🏠</span><span data-i18n="nav_home">Baş sahypa</span></button>
+      <button type="button" class="nav-btn" data-tab="stores"><span class="nav-icon-wrap">🏪</span><span data-i18n="nav_stores">Dükanlar</span></button>
+      <button type="button" class="nav-btn" data-tab="favorites"><span class="nav-icon-wrap">❤️</span><span data-i18n="nav_favs">Halanan</span></button>
+      <button type="button" class="nav-btn" data-tab="cart"><span class="nav-icon-wrap">🛒<span class="nav-badge" id="navCartBadge">0</span></span><span data-i18n="nav_cart">Sebet</span></button>
+      <button type="button" class="nav-btn" data-tab="orders"><span class="nav-icon-wrap">📦</span><span data-i18n="nav_orders">Sargytlar</span></button>
+    </nav>
+  </div>
+
+  <!-- PRODUCT DETAIL & OPTIONS SHEET -->
+  <div class="sheet-overlay" id="productSheet"><div class="sheet-card" id="productSheetBody"></div></div>
+
+  <!-- MULTI-ADDRESS SHEET -->
+  <div class="sheet-overlay" id="addrSheet">
+    <div class="sheet-card">
+      <div class="sheet-handle"></div>
+      <h3 style="font-size:18px;font-weight:800;">📍 Salgylarym</h3>
+      <div id="savedAddrList" style="display:flex;flex-direction:column;gap:8px;"></div>
+      <hr style="border:none;border-top:1px solid var(--border);"/>
+      <div style="font-size:13px;font-weight:800;">➕ Täze salgy goş</div>
+      <div class="pay-row" style="grid-template-columns:repeat(3,1fr);">
+        <button type="button" class="pay-opt active" data-alabel="Öý">🏠 Öý</button>
+        <button type="button" class="pay-opt" data-alabel="Iş">💼 Iş</button>
+        <button type="button" class="pay-opt" data-alabel="Başga">📍 Başga</button>
+      </div>
+      <div class="field"><label>Adyňyz we familiýaňyz</label><input id="aName" placeholder="Merdan Ataýew" /></div>
+      <div class="field"><label>Telefon (GSM)</label><input id="aPhone" inputmode="tel" placeholder="65 12 34 56" /></div>
+      <div class="field"><label>Salgy</label><textarea id="aAddress" rows="2" placeholder="Etrapça, köçe, jaý, öý"></textarea></div>
+      <button type="button" class="gps-btn" id="addrGpsBtn">🛰️ Häzirki GPS ýerimi al</button>
+      <button type="button" class="checkout-btn" id="saveAddrBtn">Salgyny ýatda sakla</button>
+      <button type="button" style="border:none;background:none;color:var(--sub);font-weight:700;padding:4px;cursor:pointer" id="closeAddrBtn">Ýap</button>
+    </div>
+  </div>
+
+  <!-- RATING & REVIEW SHEET -->
+  <div class="sheet-overlay" id="rateSheet">
+    <div class="sheet-card">
+      <div class="sheet-handle"></div>
+      <h3 style="font-size:18px;font-weight:800;text-align:center;">⭐ Dükana baha beriň</h3>
+      <p id="rateStoreName" style="text-align:center;font-size:13px;color:var(--sub);margin-top:-6px;"></p>
+      <div class="stars-pick" id="starsPick">
+        <button type="button" data-star="1" class="on">⭐</button>
+        <button type="button" data-star="2" class="on">⭐</button>
+        <button type="button" data-star="3" class="on">⭐</button>
+        <button type="button" data-star="4" class="on">⭐</button>
+        <button type="button" data-star="5" class="on">⭐</button>
+      </div>
+      <div class="field"><label>Teswiriňiz (islege görä)</label><textarea id="rateComment" rows="3" placeholder="Tagamlar gyzgyn we tiz geldi!"></textarea></div>
+      <button type="button" class="checkout-btn" id="submitRateBtn">Baha ber ✓</button>
+      <button type="button" style="border:none;background:none;color:var(--sub);font-weight:700;padding:4px;cursor:pointer" id="closeRateBtn">Ýap</button>
+    </div>
+  </div>
+
+  <!-- ORDER SUCCESS SHEET -->
+  <div class="sheet-overlay" id="successSheet">
+    <div class="sheet-card" style="text-align:center;align-items:center;">
+      <div class="sheet-handle"></div>
+      <div style="width:68px;height:68px;border-radius:24px;background:var(--accent-soft);color:var(--accent2);display:flex;align-items:center;justify-content:center;font-size:36px;">🎉</div>
+      <h3 style="font-size:20px;font-weight:800;">Sargydyňyz ugradyldy!</h3>
+      <p id="successSub" style="font-size:13px;color:var(--sub);max-width:300px;"></p>
+      <div id="successList" style="width:100%;text-align:left;display:flex;flex-direction:column;gap:8px;"></div>
+      <button type="button" class="checkout-btn" id="goOrdersAfterBtn">Sargytlarymy yzarla →</button>
+    </div>
+  </div>
+
+  
+  <!-- SUPPORT TICKET MODAL -->
+  <div class="sheet-overlay" id="ticketSheet">
+    <div class="sheet-card">
+      <div class="sheet-handle"></div>
+      <h3 style="font-size:18px;font-weight:800;">🎧 Goldaw / Şikaýat Bileti</h3>
+      <input type="hidden" id="tkOrderCode" />
+      <div class="field"><label>Meseläni ýazyň *</label><textarea id="tkMsg" rows="3" placeholder="Mysal: Haryt kem geldi ýa-da sowuk geldi..."></textarea></div>
+      <button type="button" class="checkout-btn" id="submitTicketBtn">Bileti iber ✓</button>
+      <button type="button" style="border:none;background:none;color:var(--sub);font-weight:700;padding:4px;cursor:pointer" id="closeTicketBtn">Ýap</button>
+    </div>
+  </div>
+
+  <!-- PRICE COMPARE MODAL -->
+  <div class="sheet-overlay" id="compareSheet">
+    <div class="sheet-card">
+      <div class="sheet-handle"></div>
+      <h3 style="font-size:18px;font-weight:800;">⚖️ Market Bahalaryny Deňeşdir</h3>
+      <div id="compareList" style="display:flex;flex-direction:column;gap:8px;"></div>
+      <button type="button" style="border:none;background:none;color:var(--sub);font-weight:700;padding:6px;cursor:pointer" id="closeCompareBtn">Ýap</button>
+    </div>
+  </div>
+
+  <!-- SELF-SERVICE STORE APPLICATION MODAL -->
+  <div class="sheet-overlay" id="applySheet">
+    <div class="sheet-card">
+      <div class="sheet-handle"></div>
+      <h3 style="font-size:18px;font-weight:800;">🏪 Dükanyňyzy ŞäherMarket-e goşuň</h3>
+      <div class="field"><label>Dükanyň ady *</label><input id="apName" placeholder="Şatlyk Market" /></div>
+      <div class="field"><label>E-poçta *</label><input id="apEmail" type="email" placeholder="shatlyk@mail.tm" /></div>
+      <div class="field"><label>Telefon *</label><input id="apPhone" placeholder="+993 65 ..." /></div>
+      <div class="field"><label>Şäher</label><select id="apCity"><option>Aşgabat</option><option>Mary</option><option>Türkmenabat</option><option>Balkanabat</option><option>Daşoguz</option></select></div>
+      <button type="button" class="checkout-btn" id="submitApplyBtn">Ýüz tutma iber ✓</button>
+      <button type="button" style="border:none;background:none;color:var(--sub);font-weight:700;padding:4px;cursor:pointer" id="closeApplyBtn">Ýap</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    (function () {
+      'use strict';
+
+      // PWA Dynamic Manifest
+      try {
+        const mf = {
+          name: 'ŞäherMarket', short_name: 'ŞäherMarket', start_url: '.',
+          display: 'standalone', background_color: '#0b1120', theme_color: '#0b1120',
+          icons: [{ src: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="22" fill="%2310b981"/><text x="50" y="68" font-size="56" text-anchor="middle" fill="white" font-family="sans-serif" font-weight="bold">Ş</text></svg>', sizes: '192x192', type: 'image/svg+xml' }]
+        };
+        const link = document.createElement('link');
+        link.rel = 'manifest';
+        link.href = 'data:application/manifest+json,' + encodeURIComponent(JSON.stringify(mf));
+        document.head.appendChild(link);
+      } catch {}
+
+      const CONFIG = {
+        SUPABASE_URL: 'https://zkypuqmwovjuuplirzig.supabase.co',
+        SUPABASE_ANON_KEY: 'sb_publishable_Rhlt7E7dYumty3PpE6Sp6Q_AzkHOp-l',
+        currency: 'm.'
+      };
+
+      const sb = (CONFIG.SUPABASE_URL && CONFIG.SUPABASE_ANON_KEY && window.supabase)
+        ? window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY)
+        : null;
+
+      // Multi-Language Dictionary (TK / RU / TR)
+      const I18N = {
+        tk: {
+          nav_home:'Baş sahypa', nav_stores:'Dükanlar', nav_favs:'Halanan', nav_cart:'Sebet', nav_orders:'Sargytlar',
+          search_ph:'Palaw, pizza, süt, bägül ýa-da dükan...', go_cart:'Sebete geç',
+          hero_title:'Şäheriň ähli zady — <span>bir basyşda</span>', hero_sub:'Gyzgyn tagamlar, marketler, güller we şäher dükanlary göni gapyňyzda.',
+          order_food:'Tagam sargyt et', all_stores:'Ähli dükanlar →', depts:'Bölümler', deals:'🔥 Şu günki arzanladyşlar',
+          restaurants:'🍽️ Naharhanalar', markets_shops:'🏪 Marketler we dükanlar', open:'Açyk', closed:'Ýapyk',
+          free_del:'Mugt eltip bermek', empty_cart:'Sebediňiz boş', checkout:'Onlaýn sargyt et →',
+          live_track:'● Göni yzarlama'
+        },
+        ru: {
+          nav_home:'Главная', nav_stores:'Магазины', nav_favs:'Избранное', nav_cart:'Корзина', nav_orders:'Заказы',
+          search_ph:'Плов, пицца, молоко, цветы или магазин...', go_cart:'В корзину',
+          hero_title:'Весь город — <span>в один клик</span>', hero_sub:'Горячая еда, маркеты, цветы и магазины города прямо к вашей двери.',
+          order_food:'Заказать еду', all_stores:'Все магазины →', depts:'Разделы', deals:'🔥 Скидки сегодня',
+          restaurants:'🍽️ Рестораны и кафе', markets_shops:'🏪 Маркеты и магазины', open:'Открыто', closed:'Закрыто',
+          free_del:'Бесплатная доставка', empty_cart:'Корзина пуста', checkout:'Оформить заказ →',
+          live_track:'● Живой статус'
+        },
+        tr: {
+          nav_home:'Ana Sayfa', nav_stores:'Dükkanlar', nav_favs:'Favoriler', nav_cart:'Sepet', nav_orders:'Siparişler',
+          search_ph:'Pilav, pizza, süt, çiçek veya dükkan...', go_cart:'Sepete Git',
+          hero_title:'Şehrin her şeyi — <span>tek tıkla</span>', hero_sub:'Sıcak yemekler, marketler, çiçekler ve şehir dükkanları kapınızda.',
+          order_food:'Yemek Sipariş Et', all_stores:'Tüm Dükkanlar →', depts:'Kategoriler', deals:'🔥 Günün Fırsatları',
+          restaurants:'🍽️ Restoranlar', markets_shops:'🏪 Marketler ve Dükkanlar', open:'Açık', closed:'Kapalı',
+          free_del:'Ücretsiz Teslimat', empty_cart:'Sepetiniz boş', checkout:'Online Sipariş Ver →',
+          live_track:'● Canlı Takip'
+        }
+      };
+
+      const DEPTS = [
+        { id:'tagamlar',    name:'Tagamlar',         emoji:'🍽️', color:'#ea580c', soft:'#ffedd5' },
+        { id:'azyk',        name:'Marketler',        emoji:'🛒', color:'#16a34a', soft:'#dcfce7' },
+        { id:'gokbakja',    name:'Gök-bakja & Et',   emoji:'🥬', color:'#15803d', soft:'#dcfce7' },
+        { id:'corek',       name:'Çörek & Süýji',    emoji:'🥐', color:'#b45309', soft:'#fef3c7' },
+        { id:'suw',         name:'Suw & içgi',       emoji:'💧', color:'#0284c7', soft:'#e0f2fe' },
+        { id:'hojalyk',     name:'Hojalyk',          emoji:'🔧', color:'#d97706', soft:'#fef3c7' },
+        { id:'arassalayys', name:'Arassalaýyş',      emoji:'🧼', color:'#0891b2', soft:'#cffafe' },
+        { id:'kosmetika',   name:'Kosmetika',        emoji:'💄', color:'#db2777', soft:'#fce7f3' },
+        { id:'elektronika', name:'Elektronika',      emoji:'🔌', color:'#7c3aed', soft:'#ede9fe' },
+        { id:'kansel',      name:'Kanselýariýa',     emoji:'✏️', color:'#4f46e5', soft:'#e0e7ff' },
+        { id:'zoo',         name:'Zoo harytlar',     emoji:'🐾', color:'#65a30d', soft:'#ecfccb' },
+        { id:'sowgat',      name:'Güller & Sowgat',  emoji:'💐', color:'#e11d48', soft:'#ffe4e6' }
+      ];
+
+      const DEFAULT_STORES = [
+        { id:'altyn_sac',  name:'Altyn Saçak',          type:'food',   emoji:'🍲', desc:'Milli tagamlar, toý palawy, manty, şaşlyk we çorba', cats:['tagamlar'],                 grad:'linear-gradient(135deg,#fb923c,#ea580c)', soft:'#ffedd5', eta:'30–45 min', rating:'4.9', hours:'09:00–23:00', isOpen:true, phone:'+993 65 11 11 01', minOrder:30, deliveryFee:10, freeDeliveryOver:100 },
+        { id:'dost_pizza', name:'Dost Pizza & Burger',  type:'food',   emoji:'🍕', desc:'Gyzgyn italýan pizzasy, sygyr burger we fri',         cats:['tagamlar','suw'],           grad:'linear-gradient(135deg,#f87171,#dc2626)', soft:'#fee2e2', eta:'25–35 min', rating:'4.8', hours:'10:00–23:30', isOpen:true, phone:'+993 65 11 11 02', minOrder:40, deliveryFee:10, freeDeliveryOver:120 },
+        { id:'tamdyr',     name:'Tamdyr Çörek & Süýji', type:'food',   emoji:'🥐', desc:'Gyzgyn tamdyr çörek, etli somsa, tort we kruassan',   cats:['corek','tagamlar'],         grad:'linear-gradient(135deg,#fbbf24,#d97706)', soft:'#fef3c7', eta:'20–30 min', rating:'4.9', hours:'07:30–21:30', isOpen:true, phone:'+993 65 11 11 03', minOrder:20, deliveryFee:8,  freeDeliveryOver:80 },
+        { id:'bereket',    name:'Bereket Market',       type:'market', emoji:'🏪', desc:'Süt önümleri, ýumurtga, ter azyk we sowuk içgiler',   cats:['azyk','suw'],               grad:'linear-gradient(135deg,#34d399,#059669)', soft:'#dcfce7', eta:'30–45 min', rating:'4.8', hours:'08:00–22:30', isOpen:true, phone:'+993 65 11 11 04', minOrder:30, deliveryFee:10, freeDeliveryOver:100 },
+        { id:'bazar_ter',  name:'Ter Bag & Et',         type:'market', emoji:'🥬', desc:'Täze gök-bakja, miweler we şu gün kesilen et',        cats:['gokbakja','azyk'],          grad:'linear-gradient(135deg,#4ade80,#15803d)', soft:'#dcfce7', eta:'35–50 min', rating:'4.9', hours:'08:00–20:30', isOpen:true, phone:'+993 65 11 11 05', minOrder:40, deliveryFee:10, freeDeliveryOver:120 },
+        { id:'cesme',      name:'Çeşme Suw',            type:'market', emoji:'⛲', desc:'19 L agyz suwy, 5 L gaplar we mineral suwlar',        cats:['suw'],                      grad:'linear-gradient(135deg,#38bdf8,#0284c7)', soft:'#e0f2fe', eta:'30–50 min', rating:'4.9', hours:'08:00–21:00', isOpen:true, phone:'+993 65 11 11 06', minOrder:20, deliveryFee:0,  freeDeliveryOver:0 },
+        { id:'tehno',      name:'Tehno Burç',           type:'shop',   emoji:'🔌', desc:'USB-C kabel, powerbank, LED lampa we batareýkalar',   cats:['elektronika','hojalyk'],    grad:'linear-gradient(135deg,#a78bfa,#6d28d9)', soft:'#ede9fe', eta:'45–60 min', rating:'4.8', hours:'09:30–20:30', isOpen:true, phone:'+993 65 11 11 07', minOrder:30, deliveryFee:15, freeDeliveryOver:150 },
+        { id:'ayjamal',    name:'Aýjamal Kosmetika',    type:'shop',   emoji:'💄', desc:'Kosmetika, şahsy ideg we hoşboý parfýumlar',          cats:['kosmetika','arassalayys'],  grad:'linear-gradient(135deg,#f472b6,#db2777)', soft:'#fce7f3', eta:'40–60 min', rating:'4.8', hours:'09:30–21:00', isOpen:true, phone:'+993 65 11 11 08', minOrder:30, deliveryFee:10, freeDeliveryOver:100 },
+        { id:'bahar_gul',  name:'Bahar Gülleri',        type:'shop',   emoji:'💐', desc:'Täze bägül çemenleri we owadan sowgat gutulary',      cats:['sowgat'],                   grad:'linear-gradient(135deg,#fb7185,#e11d48)', soft:'#ffe4e6', eta:'30–45 min', rating:'4.9', hours:'08:30–21:30', isOpen:true, phone:'+993 65 11 11 10', minOrder:50, deliveryFee:0,  freeDeliveryOver:0 }
+      ];
+
+      const DEFAULT_PRODUCTS = [
+        { id:'f1', storeId:'altyn_sac',  cat:'Esasy tagam', title:'Toý palawy (sygyr etli)',     unit:'400 g',    price:45, oldPrice:52, emoji:'🍛', deal:true,  inStock:true, desc:'Täze bişirilen türkmen palawy, sary käşir we ýumşak sygyr eti bilen.', options:[{name:'Uly porsiýa (+150g)',price:12},{name:'Goşmaça salat',price:10},{name:'Sogansyz',price:0}] },
+        { id:'f2', storeId:'altyn_sac',  cat:'Esasy tagam', title:'Bugda bişen manty',           unit:'5 sany',   price:40, emoji:'🥟', inStock:true, desc:'El bilen bükülen etli manty, gaýmak we gatyk bilen.', options:[{name:'Goşmaça gaýmak',price:5},{name:'Ajy sously',price:3}] },
+        { id:'f3', storeId:'altyn_sac',  cat:'Mangal',      title:'Lýulýa şaşlyk (lawaşly)',     unit:'1 çiş',    price:38, emoji:'🍢', inStock:true, desc:'Kömürde bişen şireli lýulýa, sogan we gök otlar bilen.', options:[{name:'Goşmaça lawaş',price:4},{name:'Ajysyz',price:0}] },
+        { id:'p1', storeId:'dost_pizza', cat:'Pizza',       title:'Pepperoni pizza (30 sm)',     unit:'600 g',    price:69, oldPrice:82, emoji:'🍕', deal:true,  inStock:true, desc:'Mozzarella peýniri, pepperoni şöhlaty we pomidor sousy.', options:[{name:'Uly 36 sm',price:22},{name:'Goşmaça peýnir',price:10},{name:'0.5L Kola goş',price:10}] },
+        { id:'p2', storeId:'dost_pizza', cat:'Burger',      title:'Çizburger (sygyr etli)',      unit:'280 g',    price:48, emoji:'🍔', inStock:true, desc:'Şireli sygyr kotleti, çeddar peýniri we özel sous.', options:[{name:'Goşa kotlet',price:18},{name:'Kartoşka fri + içgi (Menýu)',price:25},{name:'Sogansyz',price:0}] },
+        { id:'m1', storeId:'tamdyr',     cat:'Tamdyr',      title:'Etli tamdyr somsa',           unit:'1 sany',   price:12, oldPrice:15, emoji:'🥟', deal:true, inStock:true, desc:'Dogralan sygyr eti we soganly gyzgyn somsa.', options:[{name:'Ajy burçly',price:0}] },
+        { id:'b1', storeId:'bereket',    cat:'Süt & Ýumurtga',title:'Süt 3,2%',                  unit:'1 L',      price:12, emoji:'🥛', inStock:true, desc:'Täze pasterizirlenen süýt.', options:[] },
+        { id:'b2', storeId:'bereket',    cat:'Süt & Ýumurtga',title:'Towuk ýumurtgasy C1',       unit:'10 sany',  price:15, oldPrice:18, emoji:'🥚', deal:true, inStock:true, desc:'Täze ferma ýumurtgasy.', options:[] },
+        { id:'g1', storeId:'bazar_ter',  cat:'Et',          title:'Täze sygyr eti (süňksüz)',    unit:'1 kg',     price:95, emoji:'🥩', inStock:true, desc:'Şu gün kesilen ýaş sygyr eti.', options:[{name:'Üwelen (farş) et',price:0},{name:'Palawlyk dogra',price:0}] },
+        { id:'c1', storeId:'cesme',      cat:'Suw',         title:'Uly gap suw (19 L)',          unit:'19 L',     price:25, emoji:'🛢️', inStock:true, desc:'Öý we ofis üçin arassa agyz suwy.', options:[] },
+        { id:'t1', storeId:'tehno',      cat:'Zarýad',      title:'Powerbank 10000 mAh',         unit:'PD 20W',   price:135, oldPrice:155, emoji:'🪫', deal:true, inStock:true, desc:'Ýuka korpus, çalt zarýad berýän powerbank.', options:[] },
+        { id:'a1', storeId:'ayjamal',    cat:'Ideg',        title:'Ýüz kremi (nemlendiriji)',    unit:'50 ml',    price:35, emoji:'✨', inStock:true, desc:'Gialuron kislotaly ýeňil krem.', options:[] },
+        { id:'fl1', storeId:'bahar_gul', cat:'Güller',      title:'Gyzyl bägül çemeni (11 sany)',unit:'1 çemen',  price:130, oldPrice:150, emoji:'🌹', deal:true, inStock:true, desc:'Täze kesilen gyzyl bägüller, owadan bezeg bilen.', options:[{name:'Gutlag haty goş',price:5},{name:'21 sany bägül et',price:90}] }
+      ];
+
+      const DEFAULT_COUPONS = [
+        { id:1, storeId:null, code:'ILKINJI20', percent:20, minOrder:40, active:true }
+      ];
+
+      const DB_STORES_KEY   = 'sm_db_stores_v1';
+      const DB_PRODUCTS_KEY = 'sm_db_products_v1';
+      const DB_ORDERS_KEY   = 'sm_db_orders_v1';
+      const DB_COUPONS_KEY  = 'sm_db_coupons_v1';
+      const DB_REVIEWS_KEY  = 'sm_db_reviews_v1';
+      const CART_KEY        = 'sm_client_cart_v4';
+      const ADDRS_KEY       = 'sm_client_addrs_v4';
+      const FAV_KEY         = 'sm_client_favs_v1';
+      const MY_CODES_KEY    = 'sm_client_mycodes_v1';
+      const LANG_KEY        = 'sm_client_lang_v4';
+
+      function loadJSON(k, f) { try { const r = localStorage.getItem(k); return r ? JSON.parse(r) : f; } catch { return f; } }
+      function saveJSON(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+
+      if (!localStorage.getItem(DB_STORES_KEY)) saveJSON(DB_STORES_KEY, DEFAULT_STORES);
+      if (!localStorage.getItem(DB_PRODUCTS_KEY)) saveJSON(DB_PRODUCTS_KEY, DEFAULT_PRODUCTS);
+      if (!localStorage.getItem(DB_ORDERS_KEY)) saveJSON(DB_ORDERS_KEY, []);
+      if (!localStorage.getItem(DB_COUPONS_KEY)) saveJSON(DB_COUPONS_KEY, DEFAULT_COUPONS);
+      if (!localStorage.getItem(DB_REVIEWS_KEY)) saveJSON(DB_REVIEWS_KEY, []);
+
+      let STORES = loadJSON(DB_STORES_KEY, DEFAULT_STORES);
+      let PRODUCTS = loadJSON(DB_PRODUCTS_KEY, DEFAULT_PRODUCTS);
+      let ALL_ORDERS = loadJSON(DB_ORDERS_KEY, []);
+      let COUPONS = loadJSON(DB_COUPONS_KEY, DEFAULT_COUPONS);
+      let REVIEWS = loadJSON(DB_REVIEWS_KEY, []);
+
+      const DEPT_BY_ID = Object.fromEntries(DEPTS.map(d => [d.id, d]));
+      let STORE_BY_ID = {}, PRODUCT_BY_ID = {};
+      function rebuildIndexes() {
+        STORE_BY_ID = Object.fromEntries(STORES.map(s => [s.id, s]));
+        PRODUCT_BY_ID = Object.fromEntries(PRODUCTS.map(p => [p.id, p]));
+      }
+      rebuildIndexes();
+
+      const state = {
+        lang: localStorage.getItem(LANG_KEY) || 'tk',
+        view: 'home', activeId: null, searchQuery: '',
+        storeTypeFilter: 'all', storeFilter: 'all', storeCatFilter: 'all', storeSearch: '',
+        storeTab: 'menu', // 'menu' | 'reviews'
+        checkoutStoreId: null, payMethod: 'cash', deliveryTime: 'Tiz (30–45 min)',
+        appliedCoupon: null,
+        // Cart items: { [lineKey]: { productId, qty, options:[{name,price}] } }
+        cart: loadJSON(CART_KEY, {}),
+        addresses: loadJSON(ADDRS_KEY, []), // [{id,label,name,phone,address,lat,lng,active}]
+        favs: loadJSON(FAV_KEY, []),
+        myOrderCodes: loadJSON(MY_CODES_KEY, []),
+        activeProductId: null,
+        selectedOpts: [],
+        newAddrLabel: 'Öý',
+        newAddrCoords: null,
+        rateOrderCode: null,
+        rateStars: 5,
+        city: localStorage.getItem('sm_city_v7') || 'Aşgabat',
+        dark: localStorage.getItem('sm_dark_v7') === '1',
+        nightOnly: false, dietFilter: '', orderType: 'delivery', courierTip: 0, contactless: false, needDeposit: false,
+        wallet: Number(localStorage.getItem('sm_wallet_v7') || 0),
+        refCode: localStorage.getItem('sm_ref_v7') || ('SM' + Math.floor(10000+Math.random()*89999))
+      };
+      localStorage.setItem('sm_ref_v7', state.refCode);
+      if (state.dark) document.body.classList.add('dark');
+      let stack = [];
+
+      const STATUS_META = {
+        new:       { label:'Täze sargyt',   cls:'st-new',       step:1 },
+        accepted:  { label:'Kabul edildi',  cls:'st-accepted',  step:2 },
+        preparing: { label:'Taýýarlanýar',  cls:'st-preparing', step:2 },
+        onway:     { label:'Kurýer ýolda',  cls:'st-onway',     step:3 },
+        delivered: { label:'Eltildi ✓',     cls:'st-delivered', step:4 },
+        cancelled: { label:'Ýatyryldy',     cls:'st-cancelled', step:0 }
+      };
+
+      const $ = id => document.getElementById(id);
+      function t(k) { return (I18N[state.lang] && I18N[state.lang][k]) || I18N.tk[k] || k; }
+      function fmt(v) { return Number(v || 0).toLocaleString('tr-TR') + ' ' + CONFIG.currency; }
+      function esc(s) { return String(s || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+      function playChime() {
+        try {
+          const ctx = new (window.AudioContext || window.webkitAudioContext)();
+          const o = ctx.createOscillator(), g = ctx.createGain();
+          o.type = 'sine'; o.frequency.setValueAtTime(880, ctx.currentTime);
+          o.frequency.exponentialRampToValueAtTime(1320, ctx.currentTime + 0.14);
+          g.gain.setValueAtTime(0.12, ctx.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+          o.connect(g); g.connect(ctx.destination); o.start(); o.stop(ctx.currentTime + 0.35);
+        } catch {}
+      }
+
+      let toastTimer;
+      function toast(msg) {
+        const el = $('toast'); el.textContent = msg; el.classList.add('show');
+        clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('show'), 2400);
+      }
+
+      function applyLangUI() {
+        $('langBtn').textContent = state.lang.toUpperCase();
+        $('searchInput').placeholder = t('search_ph');
+        $('fcText').textContent = t('go_cart');
+        document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.getAttribute('data-i18n')); });
+      }
+
+      function activeAddress() {
+        return state.addresses.find(a => a.active) || state.addresses[0] || null;
+      }
+      function updateTopAddr() {
+        const a = activeAddress();
+        $('topAddrText').textContent = a ? (a.label + ': ' + a.address) : 'Salgy saýla';
+      }
+
+      function storeRatingText(storeId, fallback) {
+        const list = REVIEWS.filter(r => r.storeId === storeId);
+        if (!list.length) return fallback || '4.9';
+        const avg = list.reduce((s, r) => s + Number(r.rating), 0) / list.length;
+        return avg.toFixed(1) + ' (' + list.length + ')';
+      }
+
+      // ===== SUPABASE SYNC + REALTIME =====
+      async function syncFromSupabase() {
+        if (!sb) return;
+        try {
+          const [sRes, pRes, cRes, rRes] = await Promise.all([
+            sb.from('stores').select('*'),
+            sb.from('products').select('*'),
+            sb.from('coupons').select('*').eq('active', true),
+            sb.from('reviews').select('*').order('created_at', { ascending:false })
+          ]);
+          if (sRes.data && sRes.data.length) STORES = sRes.data.map(r => ({
+            id:r.id, name:r.name, type:r.type || 'shop', emoji:r.emoji || '🏪', desc:r.desc || '',
+            cats:r.cats || [], grad:r.grad, soft:r.soft || '#f1f5f9', eta:r.eta || '30–45 min',
+            rating:r.rating || '4.9', hours:r.hours || '09:00–22:00', isOpen:r.is_open !== false,
+            phone:r.phone || '', logoUrl:r.logo_url || '', coverUrl:r.cover_url || '',
+            minOrder:Number(r.min_order || 0), deliveryFee:Number(r.delivery_fee || 0),
+            freeDeliveryOver:Number(r.free_delivery_over || 0), isFeatured:!!r.is_featured
+          }));
+          if (pRes.data && pRes.data.length) PRODUCTS = pRes.data.map(r => ({
+            id:r.id, storeId:r.store_id, cat:r.cat || 'Esasy', title:r.title, unit:r.unit || '1 sany',
+            price:Number(r.price), oldPrice:r.old_price ? Number(r.old_price) : null,
+            emoji:r.emoji || '📦', deal:!!r.deal, inStock:r.in_stock !== false,
+            desc:r.desc || '', imageUrl:r.image_url || '', options:Array.isArray(r.options) ? r.options : []
+          }));
+          if (cRes.data) COUPONS = cRes.data.map(r => ({ id:r.id, storeId:r.store_id, code:r.code, percent:Number(r.percent), minOrder:Number(r.min_order || 0), active:r.active }));
+          if (rRes.data) REVIEWS = rRes.data.map(r => ({ id:r.id, orderCode:r.order_code, storeId:r.store_id, customerName:r.customer_name, rating:r.rating, comment:r.comment, reply:r.reply, createdAt:new Date(r.created_at).getTime() }));
+          if (state.myOrderCodes.length) {
+            const oRes = await sb.from('orders').select('*').in('code', state.myOrderCodes).order('created_at', { ascending:false });
+            if (oRes.data) ALL_ORDERS = oRes.data.map(mapOrderFromSb);
+          }
+          rebuildIndexes();
+          renderView(false);
+        } catch (err) { console.warn('Sync:', err); }
+      }
+
+      function mapOrderFromSb(r) {
+        return {
+          code:r.code, storeId:r.store_id, storeName:r.store_name, status:r.status,
+          createdAt:new Date(r.created_at).getTime(), customerName:r.customer_name,
+          customerPhone:r.customer_phone, address:r.address, note:r.note, pay:r.pay_method,
+          deliveryTime:r.delivery_time || 'Tiz', lat:r.lat, lng:r.lng,
+          couponCode:r.coupon_code, discount:Number(r.discount || 0), deliveryFee:Number(r.delivery_fee || 0),
+          cancelReason:r.cancel_reason || '', rated:!!r.rated,
+          items:r.items || [], total:Number(r.total), count:Number(r.count)
+        };
+      }
+
+      function startRealtime() {
+        if (!sb) return;
+        sb.channel('client-live')
+          .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'orders' }, payload => {
+            const o = mapOrderFromSb(payload.new);
+            if (state.myOrderCodes.includes(o.code)) {
+              const idx = ALL_ORDERS.findIndex(x => x.code === o.code);
+              if (idx >= 0) ALL_ORDERS[idx] = o; else ALL_ORDERS.unshift(o);
+              const sm = STATUS_META[o.status] || STATUS_META.new;
+              playChime();
+              toast('🔔 ' + o.storeName + ': ' + sm.label);
+              renderView(false);
+            }
+          })
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'stores' }, () => syncFromSupabase())
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, () => syncFromSupabase())
+          .subscribe();
+      }
+
+      window.addEventListener('storage', e => {
+        if ([DB_STORES_KEY, DB_PRODUCTS_KEY, DB_ORDERS_KEY, DB_COUPONS_KEY, DB_REVIEWS_KEY].includes(e.key)) {
+          STORES = loadJSON(DB_STORES_KEY, DEFAULT_STORES);
+          PRODUCTS = loadJSON(DB_PRODUCTS_KEY, DEFAULT_PRODUCTS);
+          ALL_ORDERS = loadJSON(DB_ORDERS_KEY, []);
+          COUPONS = loadJSON(DB_COUPONS_KEY, DEFAULT_COUPONS);
+          REVIEWS = loadJSON(DB_REVIEWS_KEY, []);
+          rebuildIndexes();
+          renderView(false);
+          if (e.key === DB_ORDERS_KEY) { playChime(); toast('🔔 Sargyt ýagdaýy täzelendi'); }
+        }
+      });
+
+      // ===== CART WITH OPTIONS =====
+      function lineKeyFor(pid, opts) {
+        const names = (opts || []).map(o => o.name).sort().join('|');
+        return pid + (names ? '::' + names : '');
+      }
+      function lineUnitPrice(p, opts) {
+        return Number(p.price) + (opts || []).reduce((s, o) => s + Number(o.price || 0), 0);
+      }
+      function productTotalQty(pid) {
+        let q = 0;
+        for (const k in state.cart) if (state.cart[k].productId === pid) q += state.cart[k].qty;
+        return q;
+      }
+
+      function addToCart(pid, opts, delta) {
+        const p = PRODUCT_BY_ID[pid];
+        if (!p || p.inStock === false) { toast('Bu haryt häzir gutardy'); return; }
+        const key = lineKeyFor(pid, opts);
+        const cur = state.cart[key] ? state.cart[key].qty : 0;
+        const next = Math.min(99, cur + delta);
+        if (next <= 0) delete state.cart[key];
+        else state.cart[key] = { productId: pid, qty: next, options: opts || [] };
+        saveJSON(CART_KEY, state.cart);
+        renderBottomNav(); renderView(false);
+      }
+
+      function updateLineQty(key, delta) {
+        if (!state.cart[key]) return;
+        const next = Math.min(99, state.cart[key].qty + delta);
+        if (next <= 0) delete state.cart[key]; else state.cart[key].qty = next;
+        saveJSON(CART_KEY, state.cart);
+        renderBottomNav(); renderView(false);
+      }
+
+      function cartSummary() {
+        let count = 0, subtotal = 0;
+        for (const k in state.cart) {
+          const line = state.cart[k], p = PRODUCT_BY_ID[line.productId];
+          if (p && line.qty > 0 && p.inStock !== false) {
+            count += line.qty;
+            subtotal += lineUnitPrice(p, line.options) * line.qty;
+          }
+        }
+        return { count, total: subtotal };
+      }
+
+      function cartGroups(scopeId) {
+        const groups = [];
+        STORES.forEach(s => {
+          if (scopeId && s.id !== scopeId) return;
+          const items = []; let count = 0, subtotal = 0;
+          for (const k in state.cart) {
+            const line = state.cart[k], p = PRODUCT_BY_ID[line.productId];
+            if (p && line.qty > 0 && p.storeId === s.id) {
+              const uPrice = lineUnitPrice(p, line.options);
+              items.push({ key: k, p, qty: line.qty, options: line.options || [], unitPrice: uPrice });
+              count += line.qty;
+              subtotal += uPrice * line.qty;
+            }
+          }
+          if (items.length) {
+            let discount = 0;
+            if (state.appliedCoupon) {
+              const cp = state.appliedCoupon;
+              if ((!cp.storeId || cp.storeId === s.id) && subtotal >= (cp.minOrder || 0)) {
+                discount = Math.round(subtotal * (cp.percent / 100));
+              }
+            }
+            const afterDisc = Math.max(0, subtotal - discount);
+            const freeOver = Number(s.freeDeliveryOver || 0);
+            const delFee = (freeOver > 0 && afterDisc >= freeOver) ? 0 : Number(s.deliveryFee || 0);
+            const minOrder = Number(s.minOrder || 0);
+            groups.push({ store: s, items, count, subtotal, discount, deliveryFee: delFee, freeOver, minOrder, total: afterDisc + delFee });
+          }
+        });
+        return groups;
+      }
+
+      // ===== NAV =====
+      function setView(v, id) {
+        state.view = v; state.activeId = id || null;
+        if (v === 'store') { state.storeCatFilter = 'all'; state.storeSearch = ''; state.storeTab = 'menu'; }
+        if (v !== 'search' && state.searchQuery) { state.searchQuery = ''; $('searchInput').value = ''; $('searchClearBtn').classList.remove('visible'); }
+        renderBottomNav(); renderView(true);
+      }
+      function go(v, id) { stack.push({ v: state.view, id: state.activeId }); setView(v, id); }
+      function back() { const p = stack.pop(); if (p) setView(p.v, p.id); else setView('home'); }
+      function goTab(tab) { stack = []; state.checkoutStoreId = null; setView(tab); if (['orders','home','stores'].includes(tab)) syncFromSupabase(); }
+
+      // ===== CARDS =====
+      function storeCardHtml(s) {
+        const n = PRODUCTS.filter(p => p.storeId === s.id && p.inStock !== false).length;
+        const fav = state.favs.includes(s.id);
+        const openBadge = s.isOpen !== false
+          ? '<span class="sc-status"><span class="live-dot" style="width:6px;height:6px;"></span>' + t('open') + '</span>'
+          : '<span class="sc-status closed">● ' + t('closed') + '</span>';
+        const delText = Number(s.deliveryFee || 0) === 0 ? t('free_del') : ('🚚 ' + fmt(s.deliveryFee) + (s.freeDeliveryOver ? ' (' + s.freeDeliveryOver + 'm+ mugt)' : ''));
+        return '<div class="store-card" data-open-store="' + s.id + '">' +
+          '<div class="sc-cover" style="background:' + (s.coverUrl ? 'url(' + esc(s.coverUrl) + ')' : (s.grad || 'var(--grad)')) + ';">' +
+            '<span class="sc-emoji">' + (s.logoUrl ? '<img src="' + esc(s.logoUrl) + '" alt="" />' : s.emoji) + '</span>' +
+            '<div class="sc-top-right">' + openBadge + '<button type="button" class="fav-btn" data-fav="' + s.id + '">' + (fav ? '❤️' : '🤍') + '</button></div>' +
+          '</div>' +
+          '<div class="sc-body">' +
+            '<div class="sc-head-line"><div class="sc-name">' + esc(s.name) + '</div><span class="sc-rating">★ ' + esc(storeRatingText(s.id, s.rating)) + '</span></div>' +
+            '<div class="sc-desc">' + esc(s.desc) + '</div>' +
+            '<div class="sc-foot"><span class="sc-pill">⏱ ' + esc(s.eta) + '</span><span class="sc-pill">' + delText + '</span><span>' + n + ' haryt</span></div>' +
+          '</div>' +
+        '</div>';
+      }
+
+      function productCardHtml(p, showStore) {
+        const st = STORE_BY_ID[p.storeId] || { emoji:'🏪', name:'Dükan', soft:'#f1f5f9' };
+        const qty = productTotalQty(p.id);
+        const hasOpts = Array.isArray(p.options) && p.options.length > 0;
+        const disc = p.oldPrice ? Math.round((1 - p.price / p.oldPrice) * 100) : 0;
+        const tag = disc > 0 ? '<span class="product-tag">-' + disc + '%</span>' : '';
+        const optTag = hasOpts ? '<span class="opt-badge">+ Saýlaw</span>' : '';
+        const src = showStore ? '<div class="product-source">' + st.emoji + ' ' + esc(st.name) + '</div>' : '';
+        let ctrl = '';
+        if (p.inStock === false) ctrl = '<span style="font-size:10.5px;font-weight:800;color:var(--danger);">Gutardy</span>';
+        else if (hasOpts) ctrl = '<button type="button" class="add-btn" data-open-prod="' + p.id + '">' + (qty > 0 ? qty : '+') + '</button>';
+        else if (qty === 0) ctrl = '<button type="button" class="add-btn" data-quick-add="' + p.id + '">+</button>';
+        else ctrl = '<div class="stepper"><button type="button" class="step-btn" data-quick-dec="' + p.id + '">−</button><span class="step-qty">' + qty + '</span><button type="button" class="step-btn plus" data-quick-add="' + p.id + '">+</button></div>';
+
+        return '<article class="product-card">' +
+          '<div class="product-click" data-open-prod="' + p.id + '">' +
+            '<div class="product-thumb" style="background:linear-gradient(155deg,' + st.soft + ',#f8fafc);">' + tag + optTag + (p.imageUrl ? '<img src="' + esc(p.imageUrl) + '" alt="" />' : p.emoji) + '</div>' +
+            src + '<div class="product-title">' + esc(p.title) + '</div><div class="product-unit">' + esc(p.unit) + '</div>' +
+          '</div>' +
+          '<div class="product-bottom">' +
+            '<div>' + (p.oldPrice ? '<div class="old-price">' + fmt(p.oldPrice) + '</div>' : '') + '<div class="product-price">' + fmt(p.price) + '</div></div>' + ctrl +
+          '</div>' +
+        '</article>';
+      }
+
+      // ===== PAGES =====
+      function renderHome() {
+        const openCount = STORES.filter(s => s.isOpen !== false).length;
+        const deals = PRODUCTS.filter(p => p.deal && p.inStock !== false);
+        const foodStores = STORES.filter(s => s.type === 'food');
+        const otherStores = STORES.filter(s => s.type !== 'food');
+        const activeGlobalCoupon = COUPONS.find(c => !c.storeId && c.active !== false);
+
+        const deptStories = DEPTS.map(d =>
+          '<button type="button" class="dept-story" data-open-dept="' + d.id + '">' +
+            '<div class="dept-ring" style="border-color:' + d.soft + ';"><div class="dept-inner" style="background:' + d.soft + ';">' + d.emoji + '</div></div>' +
+            '<span class="dept-lbl">' + esc(d.name) + '</span>' +
+          '</button>'
+        ).join('');
+
+        const lastOrd = ALL_ORDERS.find(o => state.myOrderCodes.includes(o.code));
+        const cities = ['Aşgabat','Mary','Türkmenabat','Balkanabat','Daşoguz'];
+        const quickStrip = '<div class="quick-strip">' +
+          '<button type="button" class="q-pill" id="cycleCityBtn">🏙️ ' + esc(state.city) + '</button>' +
+          '<button type="button" class="q-pill' + (state.nightOnly ? ' on' : '') + '" id="nightFilterBtn">🌙 Gije açyklar</button>' +
+          '<button type="button" class="q-pill" id="openCompareBtn">⚖️ Baha deňeşdir</button>' +
+          '<button type="button" class="q-pill" id="copyRefBtn">🎁 Dost çagyr: ' + state.refCode + '</button>' +
+          '<button type="button" class="q-pill" id="openApplyBtn">🏪 Dükan goş</button>' +
+        '</div>' +
+        (state.wallet > 0 ? '<div class="wallet-bar"><span>👛 Gapjyk balansyňyz (2% keşbek): <b>' + fmt(state.wallet) + '</b></span><span style="font-size:10.5px;">Indiki sargytda ulanylýar</span></div>' : '') +
+        (lastOrd ? '<div class="repeat-widget"><div><div style="font-size:11px;color:#94a3b8;font-weight:700;">Öňki sargydyňyz (' + esc(lastOrd.storeName) + ')</div><strong style="font-size:13px;">' + fmt(lastOrd.total) + ' • ' + lastOrd.count + ' haryt</strong></div><button type="button" class="hero-btn" data-reorder="' + esc(lastOrd.code) + '">1 basyşda gaýtala</button></div>' : '');
+        return '<div class="fade-in">' + quickStrip +
+          '<div class="hero">' +
+            '<div class="hero-live"><span class="live-dot"></span>' + openCount + ' dükan häzir açyk</div>' +
+            '<h1>' + t('hero_title') + '</h1><p>' + t('hero_sub') + '</p>' +
+            '<div class="hero-floats"><div class="hf-orb">🍕</div><div class="hf-orb">🛒</div><div class="hf-orb">💐</div></div>' +
+            '<div class="hero-cta-row"><button type="button" class="hero-btn" data-open-type="food">' + t('order_food') + '</button><button type="button" class="hero-btn ghost" data-go-stores="true">' + t('all_stores') + '</button></div>' +
+          '</div>' +
+          (activeGlobalCoupon ? '<div class="promo-bar" data-copy-coupon="' + esc(activeGlobalCoupon.code) + '"><div><div style="font-size:12.5px;font-weight:800;color:#c2410c;">🎁 -' + activeGlobalCoupon.percent + '% arzanladyş kupony!</div><div style="font-size:11px;color:#9a3412;">Sebetde ulanmak üçin üstüne basyň</div></div><span class="promo-code">' + esc(activeGlobalCoupon.code) + '</span></div>' : '') +
+          '<div class="bento-modes">' +
+            '<button type="button" class="bento-big" data-open-type="food"><div><div class="bm-title">Gyzgyn tagamlar</div><div class="bm-sub">Palaw, pizza, somsa • 25 min</div></div><div class="bm-sub" style="font-weight:800;opacity:1;">Seret →</div><span class="bm-emoji">🍽️</span></button>' +
+            '<div class="bento-stack">' +
+              '<button type="button" class="bento-sm market" data-open-type="market"><div><div class="bm-title">Marketler</div><div class="bm-sub">Azyk, et, suw</div></div><span class="bm-emoji">🛒</span></button>' +
+              '<button type="button" class="bento-sm shop" data-open-type="shop"><div><div class="bm-title">Şäher dükanlary</div><div class="bm-sub">Tehno, gül, ideg</div></div><span class="bm-emoji">✨</span></button>' +
+            '</div>' +
+          '</div>' +
+          '<div class="section-head"><h2 class="section-title">' + t('depts') + '</h2></div>' +
+          '<div class="dept-scroll">' + deptStories + '</div>' +
+          (deals.length ? '<div class="section-head"><h2 class="section-title">' + t('deals') + '</h2></div><div class="h-scroll">' + deals.map(p => productCardHtml(p, true)).join('') + '</div>' : '') +
+          '<div class="section-head"><h2 class="section-title">' + t('restaurants') + '</h2><button type="button" class="section-link" data-open-type="food">Ählisi</button></div>' +
+          '<div class="h-scroll">' + foodStores.map(storeCardHtml).join('') + '</div>' +
+          '<div class="section-head"><h2 class="section-title">' + t('markets_shops') + '</h2><button type="button" class="section-link" data-go-stores="true">Ählisi</button></div>' +
+          '<div class="stores-grid">' + otherStores.slice(0, 6).map(storeCardHtml).join('') + '</div>' +
+        '</div>';
+      }
+
+      function renderStoresTab() {
+        const types = [{ id:'all', label:'Ählisi' }, { id:'food', label:'🍽️ Tagamlar' }, { id:'market', label:'🛒 Marketler' }, { id:'shop', label:'✨ Dükanlar' }]
+          .map(x => '<button type="button" class="chip' + (state.storeTypeFilter === x.id ? ' active' : '') + '" data-type-filter="' + x.id + '">' + x.label + '</button>').join('');
+        const depts = '<button type="button" class="chip' + (state.storeFilter === 'all' ? ' active' : '') + '" data-filter="all">Ähli bölümler</button>' +
+          DEPTS.map(d => '<button type="button" class="chip' + (state.storeFilter === d.id ? ' active' : '') + '" data-filter="' + d.id + '">' + d.emoji + ' ' + esc(d.name) + '</button>').join('');
+        let list = STORES;
+        if (state.storeTypeFilter !== 'all') list = list.filter(s => s.type === state.storeTypeFilter);
+        if (state.storeFilter !== 'all') list = list.filter(s => (s.cats || []).includes(state.storeFilter));
+        return '<div class="fade-in"><div class="section-head" style="margin-top:2px;"><h2 class="section-title">' + t('nav_stores') + '</h2><span style="font-size:12px;color:var(--sub);font-weight:700;">' + list.length + ' ýer</span></div><div class="chips">' + types + '</div><div class="chips">' + depts + '</div>' +
+          (list.length ? '<div class="stores-grid">' + list.map(storeCardHtml).join('') + '</div>' : '<div class="empty-box"><div style="font-size:36px;">🏪</div><strong>Dükan tapylmady</strong><button type="button" class="primary-small-btn" data-reset-filters="true">Ählisini görkez</button></div>') + '</div>';
+      }
+
+      function renderDept() {
+        const d = DEPT_BY_ID[state.activeId]; if (!d) return renderHome();
+        const list = STORES.filter(s => (s.cats || []).includes(d.id));
+        return '<div class="fade-in"><div class="sub-header"><button type="button" class="back-btn" data-back="true">← Yza</button><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:20px;">' + d.emoji + '</span><strong style="font-size:15.5px;">' + esc(d.name) + '</strong></div></div><div class="stores-grid">' + list.map(storeCardHtml).join('') + '</div></div>';
+      }
+
+      function renderStore() {
+        const s = STORE_BY_ID[state.activeId]; if (!s) return renderHome();
+        const allItems = PRODUCTS.filter(p => p.storeId === s.id);
+        const cats = [...new Set(allItems.map(p => p.cat).filter(Boolean))];
+        const fav = state.favs.includes(s.id);
+        const storeReviews = REVIEWS.filter(r => r.storeId === s.id);
+
+        let items = allItems;
+        if (state.storeCatFilter !== 'all') items = items.filter(p => p.cat === state.storeCatFilter);
+        if (state.storeSearch.trim()) {
+          const sq = state.storeSearch.trim().toLowerCase();
+          items = items.filter(p => (p.title + ' ' + (p.desc || '')).toLowerCase().includes(sq));
+        }
+
+        const bodyHtml = state.storeTab === 'reviews'
+          ? (storeReviews.length ? storeReviews.map(r =>
+              '<div class="review-card"><div style="display:flex;justify-content:space-between;align-items:center;"><strong>' + esc(r.customerName) + '</strong><span style="color:#b45309;font-weight:800;">' + '⭐'.repeat(r.rating) + '</span></div>' +
+              (r.comment ? '<p style="font-size:12.5px;color:var(--ink);margin-top:5px;">' + esc(r.comment) + '</p>' : '') +
+              (r.reply ? '<div class="review-reply"><strong>' + esc(s.name) + ':</strong> ' + esc(r.reply) + '</div>' : '') + '</div>'
+            ).join('') : '<div class="empty-box"><div style="font-size:34px;">💬</div><strong>Entek teswir ýok</strong></div>')
+          : '<input type="text" class="store-search" id="storeSearchInput" placeholder="Şu dükanyň içinde gözle..." value="' + esc(state.storeSearch) + '" />' +
+            (cats.length > 1 ? '<div class="chips"><button type="button" class="chip' + (state.storeCatFilter === 'all' ? ' active' : '') + '" data-store-cat="all">Ählisi</button>' + cats.map(c => '<button type="button" class="chip' + (state.storeCatFilter === c ? ' active' : '') + '" data-store-cat="' + esc(c) + '">' + esc(c) + '</button>').join('') + '</div>' : '') +
+            (items.length ? '<div class="products-grid">' + items.map(p => productCardHtml(p, false)).join('') + '</div>' : '<div class="empty-box"><div>🔍</div><strong>Haryt tapylmady</strong></div>');
+
+        return '<div class="fade-in">' +
+          '<div class="store-hero">' +
+            '<div class="sh-cover" style="background:' + (s.coverUrl ? 'url(' + esc(s.coverUrl) + ')' : (s.grad || 'var(--grad)')) + ';">' +
+              '<button type="button" class="back-btn" style="background:rgba(255,255,255,.92);" data-back="true">← Yza</button>' +
+              '<button type="button" class="fav-btn" data-fav="' + s.id + '" style="width:36px;height:36px;font-size:17px;">' + (fav ? '❤️' : '🤍') + '</button>' +
+            '</div>' +
+            '<div class="sh-avatar">' + (s.logoUrl ? '<img src="' + esc(s.logoUrl) + '" alt="" />' : s.emoji) + '</div>' +
+            '<div class="sh-body">' + (s.announcement ? '<div class="ann-banner">📢 ' + esc(s.announcement) + '</div>' : '') + (s.weatherMode || s.busyExtraMin ? '<div style="font-size:11.5px;color:#ea580c;font-weight:800;">⏱️ Ýükli / Ýagyş tertibi: +' + ((s.busyExtraMin||0)+(s.weatherMode?15:0)) + ' min</div>' : '') +
+              '<div style="font-size:20px;font-weight:800;">' + esc(s.name) + '</div>' +
+              '<div style="font-size:12.5px;color:var(--sub);">' + esc(s.desc) + '</div>' +
+              '<div class="sh-stats">' +
+                '<span class="sh-stat ' + (s.isOpen !== false ? 'open' : 'closed') + '">' + (s.isOpen !== false ? '● ' + t('open') + ' (' + esc(s.hours) + ')' : '● ' + t('closed')) + '</span>' +
+                '<span class="sh-stat">★ ' + esc(storeRatingText(s.id, s.rating)) + '</span>' +
+                '<span class="sh-stat">⏱ ' + esc(s.eta) + '</span>' +
+                (s.minOrder ? '<span class="sh-stat">Min: ' + fmt(s.minOrder) + '</span>' : '') +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="chips">' +
+            '<button type="button" class="chip' + (state.storeTab === 'menu' ? ' active' : '') + '" data-store-tab="menu">🛍️ Harytlar (' + allItems.length + ')</button>' +
+            '<button type="button" class="chip' + (state.storeTab === 'reviews' ? ' active' : '') + '" data-store-tab="reviews">⭐ Teswirler (' + storeReviews.length + ')</button>' +
+          '</div>' + bodyHtml +
+        '</div>';
+      }
+
+      function renderFavorites() {
+        const list = STORES.filter(s => state.favs.includes(s.id));
+        if (!list.length) return '<div class="empty-box fade-in"><div style="font-size:40px;">❤️</div><strong>Halanan dükan ýok</strong><button type="button" class="primary-small-btn" data-go-stores="true">Dükanlara seret</button></div>';
+        return '<div class="fade-in"><div class="section-head" style="margin-top:2px;"><h2 class="section-title">' + t('nav_favs') + '</h2></div><div class="stores-grid">' + list.map(storeCardHtml).join('') + '</div></div>';
+      }
+
+      function renderSearch() {
+        const q = state.searchQuery.trim().toLowerCase();
+        const fs = STORES.filter(s => (s.name + ' ' + s.desc).toLowerCase().includes(q));
+        const fp = PRODUCTS.filter(p => (p.title + ' ' + (p.desc || '')).toLowerCase().includes(q));
+        let body = '';
+        if (fs.length) body += '<div class="section-head" style="margin-top:2px;"><h2 class="section-title">Dükanlar</h2></div><div class="stores-grid">' + fs.map(storeCardHtml).join('') + '</div>';
+        if (fp.length) body += '<div class="section-head"><h2 class="section-title">Harytlar</h2></div><div class="products-grid">' + fp.map(p => productCardHtml(p, true)).join('') + '</div>';
+        if (!fs.length && !fp.length) body = '<div class="empty-box"><div style="font-size:38px;">🔍</div><strong>Hiç zat tapylmady</strong></div>';
+        return '<div class="fade-in"><div class="sub-header"><button type="button" class="back-btn" data-back="true">← Yza</button><strong>«' + esc(state.searchQuery.trim()) + '»</strong></div>' + body + '</div>';
+      }
+
+      function renderCart() {
+        const groups = cartGroups(null);
+        if (!groups.length) return '<div class="empty-box fade-in"><div style="font-size:44px;">🛒</div><strong>' + t('empty_cart') + '</strong><button type="button" class="primary-small-btn" data-go-stores="true">Dükanlara geç</button></div>';
+
+        const totalSub = groups.reduce((a, g) => a + g.subtotal, 0);
+        const totalDisc = groups.reduce((a, g) => a + g.discount, 0);
+        const totalDel = groups.reduce((a, g) => a + g.deliveryFee, 0);
+        const grandTotal = groups.reduce((a, g) => a + g.total, 0);
+        const hasMinIssue = groups.some(g => g.minOrder > 0 && g.subtotal < g.minOrder);
+
+        return '<div class="fade-in">' +
+          '<div class="section-head" style="margin-top:2px;"><h2 class="section-title">' + t('nav_cart') + '</h2><button type="button" style="border:none;background:none;color:var(--danger);font-weight:800;font-size:12px;cursor:pointer;" data-cart-clear="true">Boşat ✕</button></div>' +
+          groups.map(g => {
+            const needFree = g.freeOver > 0 ? Math.max(0, g.freeOver - (g.subtotal - g.discount)) : 0;
+            const pctFree = g.freeOver > 0 ? Math.min(100, Math.round(((g.subtotal - g.discount) / g.freeOver) * 100)) : 100;
+            return '<div class="cart-group">' +
+              '<div class="cg-head" data-open-store="' + g.store.id + '"><span class="cg-emoji" style="background:' + g.store.soft + ';">' + (g.store.logoUrl ? '<img src="' + esc(g.store.logoUrl) + '" />' : g.store.emoji) + '</span><span style="flex:1;font-weight:800;">' + esc(g.store.name) + '</span><strong>' + fmt(g.total) + '</strong></div>' +
+              (g.minOrder > 0 && g.subtotal < g.minOrder ? '<div class="min-warn">⚠️ Iň az sargyt: ' + fmt(g.minOrder) + ' (ýene ' + fmt(g.minOrder - g.subtotal) + ' goşuň)</div>' : '') +
+              (g.freeOver > 0 && g.store.deliveryFee > 0 ? '<div class="free-bar-wrap">' + (needFree > 0 ? '🚚 Mugt eltip bermek üçin ýene ' + fmt(needFree) + ' goşuň!' : '🎉 Eltip bermek MUGT!') + '<div class="free-bar"><div class="free-bar-fill" style="width:' + pctFree + '%;"></div></div></div>' : '') +
+              g.items.map(it =>
+                '<div class="cart-item">' +
+                  '<div class="cart-emoji" style="background:' + g.store.soft + ';">' + (it.p.imageUrl ? '<img src="' + esc(it.p.imageUrl) + '" />' : it.p.emoji) + '</div>' +
+                  '<div class="cart-info"><div class="cart-title">' + esc(it.p.title) + '</div>' +
+                    (it.options.length ? '<div class="cart-opts">' + it.options.map(o => o.name).join(', ') + '</div>' : '') +
+                    '<div class="cart-price-line">' + esc(it.p.unit) + ' • <strong>' + fmt(it.unitPrice * it.qty) + '</strong></div></div>' +
+                  '<div class="stepper"><button type="button" class="step-btn" data-line-dec="' + esc(it.key) + '">−</button><span class="step-qty">' + it.qty + '</span><button type="button" class="step-btn plus" data-line-inc="' + esc(it.key) + '">+</button></div>' +
+                '</div>'
+              ).join('') +
+            '</div>';
+          }).join('') +
+          '<div class="summary-card">' +
+            '<div class="coupon-row"><input id="couponInput" placeholder="Kupon kody (ILKINJI20)" value="' + esc(state.appliedCoupon ? state.appliedCoupon.code : '') + '" /><button type="button" id="applyCouponBtn">Ulan</button></div>' +
+            (state.appliedCoupon ? '<div style="font-size:11.5px;color:var(--accent2);font-weight:800;">✓ Kupon işjeň: ' + esc(state.appliedCoupon.code) + ' (-' + state.appliedCoupon.percent + '%) <button type="button" id="removeCouponBtn" style="border:none;background:none;color:var(--danger);font-weight:800;cursor:pointer;">✕</button></div>' : '') +
+            '<div class="summary-row"><span>Harytlar</span><span>' + fmt(totalSub) + '</span></div>' +
+            (totalDisc > 0 ? '<div class="summary-row" style="color:var(--accent2);"><span>Arzanladyş</span><span>-' + fmt(totalDisc) + '</span></div>' : '') +
+            '<div class="summary-row"><span>Eltip bermek</span><span style="color:var(--accent2);font-weight:800;">' + (totalDel > 0 ? fmt(totalDel) : 'Mugt') + '</span></div>' +
+            '<div class="summary-row"><span>Umumy jemi</span><span class="summary-total">' + fmt(grandTotal) + '</span></div>' +
+            '<button type="button" class="checkout-btn" data-checkout-all="true"' + (hasMinIssue ? ' disabled' : '') + '>' + t('checkout') + '</button>' +
+          '</div>' +
+        '</div>';
+      }
+
+      function renderCheckout() {
+        const groups = cartGroups(state.checkoutStoreId);
+        if (!groups.length) return renderCart();
+        const a = activeAddress() || {};
+        const totalSum = groups.reduce((s, g) => s + g.total, 0);
+        const slots = ['Tiz (30–45 min)', 'Şu gün 18:00–19:30', 'Şu gün 19:30–21:00', 'Ertir 10:00–12:00'];
+
+        return '<div class="fade-in">' +
+          '<div class="sub-header"><button type="button" class="back-btn" data-back="true">← Yza</button><strong>Sargydy tassykla</strong></div>' +
+          '<form id="checkoutForm" class="form-card" novalidate>' +
+            '<div class="field" id="fName"><label>Adyňyz we familiýaňyz *</label><input id="cName" value="' + esc(a.name || '') + '" placeholder="Merdan Ataýew" /><div class="err"></div></div>' +
+            '<div class="field" id="fPhone"><label>Telefon (GSM) *</label><input id="cPhone" inputmode="tel" value="' + esc(a.phone || '') + '" placeholder="65 12 34 56" /><div class="err"></div></div>' +
+            '<div class="field" id="fAddress"><label>Eltip bermek salgysy *</label><textarea id="cAddress" rows="2" placeholder="Etrapça, köçe, jaý, öý">' + esc(a.address || '') + '</textarea><div class="err"></div></div>' +
+            '<button type="button" class="gps-btn" id="checkoutGpsBtn">' + (state.newAddrCoords || a.lat ? '✅ GPS konumy goşuldy' : '🛰️ Kurýer üçin GPS konumyny goş') + '</button>' +
+            '<div class="field"><label>Eltip bermek wagty</label><select id="cTime">' + slots.map(sl => '<option value="' + esc(sl) + '"' + (state.deliveryTime === sl ? ' selected' : '') + '>' + esc(sl) + '</option>').join('') + '</select></div>' +
+            '<div class="field"><label>Töleg görnüşi</label><div class="pay-row">' +
+              '<button type="button" class="pay-opt' + (state.payMethod === 'cash' ? ' active' : '') + '" data-pay="cash">💵 Nagt</button>' +
+              '<button type="button" class="pay-opt' + (state.payMethod === 'card' ? ' active' : '') + '" data-pay="card">💳 Kart</button>' +
+            '</div></div>' +
+            '<div class="field"><label>Bellik (islege görä)</label><textarea id="cNote" rows="2" placeholder="Mysal: jaň etmäň, gapyny kakyň"></textarea></div>' +
+            '<div class="summary-row"><span>Jemi töleg</span><span class="summary-total">' + fmt(totalSum) + '</span></div>' +
+            '<div class="field"><label>Alyş görnüşi</label><div class="pay-row"><button type="button" class="pay-opt' + (state.orderType==='delivery'?' active':'') + '" data-otype="delivery">🚚 Eltip bermek</button><button type="button" class="pay-opt' + (state.orderType==='takeaway'?' active':'') + '" data-otype="takeaway">🥡 Özüm alaryn (Gel-Al)</button></div></div>' +
+            '<div class="field"><label>Kurýer üçin çaýpuly (Bahşiş)</label><div class="gram-row"><button type="button" class="gram-btn' + (state.courierTip===0?' on':'') + '" data-tip="0">0 m.</button><button type="button" class="gram-btn' + (state.courierTip===5?' on':'') + '" data-tip="5">+5 m.</button><button type="button" class="gram-btn' + (state.courierTip===10?' on':'') + '" data-tip="10">+10 m.</button><button type="button" class="gram-btn' + (state.courierTip===20?' on':'') + '" data-tip="20">+20 m.</button></div></div>' +
+            '<label style="display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;cursor:pointer;"><input type="checkbox" id="cContactless"' + (state.contactless?' checked':'') + ' /> 🚪 Gapynyň öňünde goýuň (Temassyz / Jaň etmäň)</label>' +
+            '<label style="display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;cursor:pointer;"><input type="checkbox" id="cDeposit"' + (state.needDeposit?' checked':'') + ' /> 🛢️ Boş 19L gapym ýok (+25 m. depozit goş)</label>' +
+            '<div class="field"><label>🎁 Sowgat / Başga alyjy (Güller üçin islege görä)</label><input id="cRecipient" placeholder="Alyjynyň ady we gutlag haty..." /></div>' +
+            '<button type="submit" class="checkout-btn">🚀 Sargydy göni dükana iber (' + fmt(totalSum + state.courierTip + (state.needDeposit?25:0)) + ')</button>' +
+          '</form>' +
+        '</div>';
+      }
+
+      function renderOrders() {
+        const myOrders = ALL_ORDERS.filter(o => state.myOrderCodes.includes(o.code));
+        if (!myOrders.length) return '<div class="empty-box fade-in"><div style="font-size:44px;">📦</div><strong>Entek sargydyňyz ýok</strong><button type="button" class="primary-small-btn" data-go-stores="true">Dükanlara geç</button></div>';
+
+        return '<div class="fade-in">' +
+          '<div class="section-head" style="margin-top:2px;"><h2 class="section-title">' + t('nav_orders') + '</h2><span style="font-size:11.5px;color:var(--accent2);font-weight:800;">' + t('live_track') + '</span></div>' +
+          myOrders.map(o => {
+            const s = STORE_BY_ID[o.storeId] || { emoji:'🏪', name:o.storeName || 'Dükan', soft:'#f1f5f9', phone:'' };
+            const sm = STATUS_META[o.status || 'new'] || STATUS_META.new;
+            const dt = new Date(o.createdAt).toLocaleString('tr-TR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
+            const segs = [1,2,3,4].map(n => '<div class="track-seg ' + (sm.step > n ? 'done' : (sm.step === n ? 'active' : '')) + '"></div>').join('');
+            return '<div class="order-card">' +
+              '<div class="order-head">' +
+                '<div class="order-emoji" style="background:' + s.soft + ';">' + s.emoji + '</div>' +
+                '<div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:800;">' + esc(s.name) + '</div><div style="font-size:11px;color:var(--sub);">' + esc(o.code) + ' • ' + dt + '</div></div>' +
+                '<span class="order-status-pill ' + sm.cls + '">' + sm.label + '</span>' +
+              '</div>' +
+              (o.status !== 'cancelled' ? '<div class="track-bar">' + segs + '</div>' : (o.cancelReason ? '<div style="font-size:11.5px;color:var(--danger);font-weight:700;">Sebäbi: ' + esc(o.cancelReason) + '</div>' : '')) +
+              '<div class="order-items-box">' + o.items.map(it => it.qty + '× ' + esc(it.title) + (it.options && it.options.length ? ' (' + it.options.map(x=>x.name).join(', ') + ')' : '')).join(' • ') +
+                '<div style="margin-top:5px;font-weight:800;">Jemi: ' + fmt(o.total) + ' • ⏰ ' + esc(o.deliveryTime || 'Tiz') + '</div></div>' +
+              (o.deliveryPin ? '<div style="font-size:11.5px;font-weight:800;color:#2563eb;">🔑 Teslimat PIN kody: ' + esc(o.deliveryPin) + '</div>' : '') + (o.serialNo ? '<div style="font-size:11.5px;font-weight:800;color:#059669;">🛡️ Kepillik / Seriýa №: ' + esc(o.serialNo) + '</div>' : '') + '<div class="order-btns">' + '<button type="button" class="oa-btn" data-ticket="' + esc(o.code) + '">🎧 Goldaw</button>' +
+                (o.status === 'delivered' && !o.rated ? '<button type="button" class="oa-btn star" data-rate-order="' + esc(o.code) + '">⭐ Baha ber</button>' : '') +
+                (s.phone ? '<a class="oa-btn" href="tel:' + esc(s.phone.replace(/\s/g,'')) + '">📞 Jaň</a>' : '') +
+                '<button type="button" class="oa-btn dark" data-reorder="' + esc(o.code) + '">🛒 Gaýtadan</button>' +
+              '</div>' +
+            '</div>';
+          }).join('') +
+        '</div>';
+      }
+
+      // ===== SUBMIT ORDER =====
+      function setErr(id, msg) { const w = $(id); if (!w) return; w.classList.toggle('invalid', !!msg); w.querySelector('.err').textContent = msg || ''; }
+
+      async function submitOrder() {
+        const name = $('cName').value.trim(), phone = $('cPhone').value.trim(), address = $('cAddress').value.trim(), note = $('cNote').value.trim();
+        const delTime = $('cTime').value;
+        let ok = true;
+        if (name.length < 2) { setErr('fName', 'Adyňyzy ýazyň.'); ok = false; } else setErr('fName', '');
+        if (phone.replace(/\D/g,'').length < 8) { setErr('fPhone', 'Dogry telefon belgisini ýazyň.'); ok = false; } else setErr('fPhone', '');
+        if (address.length < 4) { setErr('fAddress', 'Salgyny ýazyň.'); ok = false; } else setErr('fAddress', '');
+        if (!ok) return;
+
+        const groups = cartGroups(state.checkoutStoreId);
+        if (!groups.length) return;
+        const a = activeAddress() || {};
+        const coords = state.newAddrCoords || (a.lat ? { lat: a.lat, lng: a.lng } : null);
+
+        const created = groups.map(g => ({
+          code: 'SM-' + Math.floor(100000 + Math.random() * 900000),
+          storeId: g.store.id, storeName: g.store.name, status: 'new', createdAt: Date.now(),
+          customerName: name, customerPhone: phone, address, note, pay: state.payMethod,
+          deliveryTime: delTime, lat: coords ? coords.lat : null, lng: coords ? coords.lng : null,
+          couponCode: g.discount > 0 && state.appliedCoupon ? state.appliedCoupon.code : null,
+          discount: g.discount, deliveryFee: g.deliveryFee, rated: false,
+          items: g.items.map(it => ({ id: it.p.id, title: it.p.title, unit: it.p.unit, price: it.unitPrice, qty: it.qty, options: it.options })),
+          total: g.total, count: g.count
+        }));
+
+        if (sb) {
+          for (const o of created) {
+            await sb.from('orders').insert([{
+              code:o.code, store_id:o.storeId, store_name:o.storeName, status:'new',
+              customer_name:o.customerName, customer_phone:o.customerPhone, address:o.address,
+              note:o.note, pay_method:o.pay, delivery_time:o.deliveryTime, lat:o.lat, lng:o.lng,
+              coupon_code:o.couponCode, discount:o.discount, delivery_fee:o.deliveryFee,
+              items:o.items, total:o.total, count:o.count
+            }]);
+          }
+        }
+
+        ALL_ORDERS = loadJSON(DB_ORDERS_KEY, []);
+        created.forEach(o => { ALL_ORDERS.unshift(o); state.myOrderCodes.unshift(o.code); });
+        saveJSON(DB_ORDERS_KEY, ALL_ORDERS);
+        saveJSON(MY_CODES_KEY, state.myOrderCodes);
+
+        if (!state.addresses.length) {
+          state.addresses.push({ id:'a_' + Date.now(), label:'Öý', name, phone, address, lat:coords?coords.lat:null, lng:coords?coords.lng:null, active:true });
+          saveJSON(ADDRS_KEY, state.addresses); updateTopAddr();
+        }
+
+        groups.forEach(g => g.items.forEach(it => delete state.cart[it.key]));
+        state.appliedCoupon = null;
+        saveJSON(CART_KEY, state.cart);
+        renderBottomNav(); renderView(false);
+
+        $('successSub').textContent = created.length > 1 ? created.length + ' dükanyň hersine öz sargydy aýratyn ugradyldy.' : created[0].storeName + ' sargydyňyzy aldy.';
+        $('successList').innerHTML = created.map(o => '<div style="background:var(--soft);padding:10px 12px;border-radius:13px;display:flex;justify-content:space-between;"><div><strong>' + esc(o.storeName) + '</strong><div style="font-size:11px;color:var(--sub);">' + o.code + '</div></div><strong style="color:var(--accent2);">' + fmt(o.total) + '</strong></div>').join('');
+        $('successSheet').classList.add('open');
+      }
+
+      // ===== SHEETS =====
+      function renderProductSheet(id) {
+        const p = PRODUCT_BY_ID[id]; if (!p) return;
+        const s = STORE_BY_ID[p.storeId] || { emoji:'🏪', name:'Dükan', soft:'#f1f5f9', eta:'30 min', rating:'4.9' };
+        const opts = Array.isArray(p.options) ? p.options : [];
+        const unitP = lineUnitPrice(p, state.selectedOpts);
+
+        $('productSheetBody').innerHTML =
+          '<div class="sheet-handle"></div>' +
+          '<div class="pd-thumb" style="background:linear-gradient(155deg,' + s.soft + ',#f8fafc);">' + (p.imageUrl ? '<img src="' + esc(p.imageUrl) + '" />' : p.emoji) + '</div>' +
+          '<div><h3 style="font-size:19px;font-weight:800;">' + esc(p.title) + '</h3><div style="font-size:12px;color:var(--sub);margin-top:2px;">' + esc(p.unit) + '</div></div>' +
+          '<p style="font-size:13px;color:var(--sub);">' + esc(p.desc || '') + '</p>' +
+          (opts.length ? '<div><div style="font-size:12.5px;font-weight:800;margin-bottom:6px;">Goşmaça saýlawlar:</div><div class="opt-list">' +
+            opts.map((o, idx) => {
+              const sel = state.selectedOpts.some(x => x.name === o.name);
+              return '<div class="opt-row' + (sel ? ' selected' : '') + '" data-toggle-opt="' + idx + '"><span>' + (sel ? '☑ ' : '☐ ') + esc(o.name) + '</span><span>' + (o.price > 0 ? '+' + fmt(o.price) : 'Mugt') + '</span></div>';
+            }).join('') + '</div></div>' : '') +
+          '<div style="display:flex;align-items:center;justify-content:space-between;background:var(--soft);padding:10px 12px;border-radius:14px;cursor:pointer;" data-sheet-store="' + s.id + '">' +
+            '<div><strong style="font-size:13px;">' + s.emoji + ' ' + esc(s.name) + '</strong><div style="font-size:11px;color:var(--sub);">★ ' + esc(storeRatingText(s.id, s.rating)) + ' • ' + esc(s.eta) + '</div></div>' +
+            '<span style="font-size:12px;font-weight:800;color:var(--accent2);">Dükana geç →</span>' +
+          '</div>' +
+          '<button type="button" class="checkout-btn" id="pdAddBtn">Sebede goş • ' + fmt(unitP) + '</button>';
+      }
+
+      function renderAddrSheet() {
+        $('savedAddrList').innerHTML = state.addresses.length ? state.addresses.map(a =>
+          '<div class="addr-card' + (a.active ? ' active' : '') + '" data-pick-addr="' + a.id + '">' +
+            '<div style="min-width:0;flex:1;"><strong style="font-size:13px;">' + esc(a.label) + (a.lat ? ' 🛰️' : '') + '</strong><div style="font-size:11.5px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + esc(a.address) + '</div></div>' +
+            '<button type="button" data-del-addr="' + a.id + '" style="border:none;background:none;color:var(--danger);font-weight:800;cursor:pointer;padding:4px;">✕</button>' +
+          '</div>'
+        ).join('') : '<div style="font-size:12px;color:var(--sub);">Entek ýatda saklanan salgy ýok.</div>';
+      }
+
+      function renderBottomNav() {
+        const sum = cartSummary();
+        const badge = $('navCartBadge');
+        badge.textContent = sum.count;
+        badge.classList.toggle('visible', sum.count > 0);
+        const showFloat = sum.count > 0 && state.view !== 'cart' && state.view !== 'checkout';
+        $('floatCartBtn').classList.toggle('visible', showFloat);
+        if (showFloat) { $('fcCount').textContent = sum.count; $('fcTotal').textContent = fmt(sum.total) + ' →'; }
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+          const tab = btn.getAttribute('data-tab');
+          const active = (tab === 'home' && ['home','dept','search'].includes(state.view)) ||
+            (tab === 'stores' && ['stores','store'].includes(state.view)) ||
+            (tab === 'favorites' && state.view === 'favorites') ||
+            (tab === 'cart' && ['cart','checkout'].includes(state.view)) ||
+            (tab === 'orders' && state.view === 'orders');
+          btn.classList.toggle('active', active);
+        });
+      }
+
+      function renderView(scrollTop) {
+        const map = { home:renderHome, stores:renderStoresTab, favorites:renderFavorites, dept:renderDept, store:renderStore, search:renderSearch, cart:renderCart, checkout:renderCheckout, orders:renderOrders };
+        $('appView').innerHTML = (map[state.view] || renderHome)();
+        if (scrollTop) window.scrollTo(0, 0);
+      }
+
+      // ===== EVENTS =====
+      $('langBtn').addEventListener('click', () => {
+        const order = ['tk','ru','tr'];
+        state.lang = order[(order.indexOf(state.lang) + 1) % order.length];
+        localStorage.setItem(LANG_KEY, state.lang);
+        
+      // v7 Extra Handlers (Theme, Voice Search, City, Compare, Support Ticket, Store Apply)
+      $('themeBtn').addEventListener('click', () => {
+        state.dark = !state.dark; document.body.classList.toggle('dark', state.dark);
+        localStorage.setItem('sm_dark_v7', state.dark ? '1' : '0');
+        $('themeBtn').textContent = state.dark ? '☀️' : '🌙';
+      });
+      $('themeBtn').textContent = state.dark ? '☀️' : '🌙';
+
+      $('voiceBtn').addEventListener('click', () => {
+        const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SR) { toast('Bu brauzerde sesli gözleg ýok'); return; }
+        const rec = new SR(); rec.lang = state.lang === 'ru' ? 'ru-RU' : 'tr-TR';
+        toast('🎙️ Gepläň...');
+        rec.onresult = e => {
+          const txt = e.results[0][0].transcript;
+          searchInput.value = txt; searchInput.dispatchEvent(new Event('input'));
+        };
+        rec.start();
+      });
+
+      $('closeTicketBtn').addEventListener('click', () => $('ticketSheet').classList.remove('open'));
+      $('submitTicketBtn').addEventListener('click', async () => {
+        const msg = $('tkMsg').value.trim(); if (!msg) { toast('Meseläni ýazyň'); return; }
+        const code = $('tkOrderCode').value;
+        const o = ALL_ORDERS.find(x => x.code === code) || {};
+        if (sb) await sb.from('support_tickets').insert([{ order_code:code, store_id:o.storeId||'', customer_name:o.customerName||'Müşderi', customer_phone:o.customerPhone||'', message:msg }]);
+        $('tkMsg').value = ''; $('ticketSheet').classList.remove('open'); toast('Goldaw bileti iberildi ✓');
+      });
+
+      $('closeCompareBtn').addEventListener('click', () => $('compareSheet').classList.remove('open'));
+      $('closeApplyBtn').addEventListener('click', () => $('applySheet').classList.remove('open'));
+      $('submitApplyBtn').addEventListener('click', async () => {
+        const nm = $('apName').value.trim(), em = $('apEmail').value.trim(), ph = $('apPhone').value.trim(), ct = $('apCity').value;
+        if (!nm || !em || !ph) { toast('Ähli meýdanlary dolduryň'); return; }
+        if (sb) await sb.from('store_applications').insert([{ store_name:nm, owner_email:em, phone:ph, city:ct, status:'pending' }]);
+        $('applySheet').classList.remove('open'); toast('Ýüz tutmaňyz kabul edildi! Admin tassyklamasyna garaşylýar ✓');
+      });
+
+      $('appView').addEventListener('click', e => {
+        const el = s => e.target.closest(s);
+        if (el('#cycleCityBtn')) { const cs=['Aşgabat','Mary','Türkmenabat','Balkanabat','Daşoguz']; state.city=cs[(cs.indexOf(state.city)+1)%cs.length]; localStorage.setItem('sm_city_v7',state.city); toast('Şäher: '+state.city); renderView(false); return; }
+        if (el('#nightFilterBtn')) { state.nightOnly=!state.nightOnly; toast(state.nightOnly?'🌙 Gije açyk dükanlar':'Ähli dükanlar'); renderView(false); return; }
+        if (el('#copyRefBtn')) { navigator.clipboard?.writeText(state.refCode); toast('Dost çagyryş kody göçürildi: '+state.refCode+' (+15 m.)'); return; }
+        if (el('#openApplyBtn')) { $('applySheet').classList.add('open'); return; }
+        if (el('#openCompareBtn')) {
+          const staples = PRODUCTS.filter(p => /süt|suw|çörek|ýumurtga|alma|palaw/i.test(p.title)).sort((a,b)=>a.price-b.price);
+          $('compareList').innerHTML = staples.map(p => { const s=STORE_BY_ID[p.storeId]||{name:'Dükan'}; return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--soft);border-radius:11px;"><div><b>'+esc(p.title)+'</b><div style="font-size:11px;color:var(--sub);">'+esc(s.name)+' • '+esc(p.unit)+'</div></div><strong style="color:var(--accent2);">'+fmt(p.price)+'</strong></div>'; }).join('');
+          $('compareSheet').classList.add('open'); return;
+        }
+        if (el('[data-otype]')) { state.orderType = el('[data-otype]').getAttribute('data-otype'); renderView(false); return; }
+        if (el('[data-tip]')) { state.courierTip = Number(el('[data-tip]').getAttribute('data-tip')); renderView(false); return; }
+        if (el('#cContactless')) { state.contactless = el('#cContactless').checked; return; }
+        if (el('#cDeposit')) { state.needDeposit = el('#cDeposit').checked; renderView(false); return; }
+        if (el('[data-ticket]')) { $('tkOrderCode').value = el('[data-ticket]').getAttribute('data-ticket'); $('ticketSheet').classList.add('open'); return; }
+      });
+
+      applyLangUI(); renderView(false);
+        toast('Dil: ' + state.lang.toUpperCase());
+      });
+
+      const searchInput = $('searchInput'), searchClearBtn = $('searchClearBtn');
+      searchInput.addEventListener('input', e => {
+        const v = e.target.value; searchClearBtn.classList.toggle('visible', v.trim().length > 0);
+        if (v.trim().length > 0) { if (state.view !== 'search') { stack.push({ v: state.view, id: state.activeId }); state.view = 'search'; } state.searchQuery = v; renderBottomNav(); renderView(false); }
+        else if (state.view === 'search') { state.searchQuery = ''; back(); }
+      });
+      searchClearBtn.addEventListener('click', () => { searchInput.value = ''; searchClearBtn.classList.remove('visible'); if (state.view === 'search') back(); });
+
+      $('brandHomeBtn').addEventListener('click', () => goTab('home'));
+      $('floatCartBtn').addEventListener('click', () => goTab('cart'));
+      document.querySelectorAll('.nav-btn').forEach(b => b.addEventListener('click', () => goTab(b.getAttribute('data-tab'))));
+
+      // Multi-Address Sheet Events
+      $('topAddrBtn').addEventListener('click', () => { renderAddrSheet(); $('addrSheet').classList.add('open'); });
+      $('closeAddrBtn').addEventListener('click', () => $('addrSheet').classList.remove('open'));
+      $('addrSheet').addEventListener('click', e => {
+        if (e.target.id === 'addrSheet') { $('addrSheet').classList.remove('open'); return; }
+        const lb = e.target.closest('[data-alabel]');
+        if (lb) {
+          state.newAddrLabel = lb.getAttribute('data-alabel');
+          $('addrSheet').querySelectorAll('[data-alabel]').forEach(x => x.classList.toggle('active', x === lb));
+          return;
+        }
+        const del = e.target.closest('[data-del-addr]');
+        if (del) {
+          e.stopPropagation();
+          state.addresses = state.addresses.filter(x => x.id !== del.getAttribute('data-del-addr'));
+          saveJSON(ADDRS_KEY, state.addresses); updateTopAddr(); renderAddrSheet(); return;
+        }
+        const pk = e.target.closest('[data-pick-addr]');
+        if (pk) {
+          const id = pk.getAttribute('data-pick-addr');
+          state.addresses.forEach(x => x.active = (x.id === id));
+          saveJSON(ADDRS_KEY, state.addresses); updateTopAddr(); $('addrSheet').classList.remove('open');
+          if (state.view === 'checkout') renderView(false);
+        }
+      });
+
+      function grabGps(cb) {
+        if (!navigator.geolocation) { toast('GPS goldanylmaýar'); return; }
+        toast('GPS kesgitlenýär...');
+        navigator.geolocation.getCurrentPosition(
+          pos => { state.newAddrCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude }; toast('GPS konumy alyndy ✓'); if (cb) cb(); },
+          () => toast('GPS rugsady berilmedi')
+        );
+      }
+      $('addrGpsBtn').addEventListener('click', () => grabGps(() => { $('addrGpsBtn').textContent = '✅ GPS konumy alyndy'; }));
+      $('saveAddrBtn').addEventListener('click', () => {
+        const address = $('aAddress').value.trim();
+        if (address.length < 3) { toast('Salgyny ýazyň'); return; }
+        state.addresses.forEach(x => x.active = false);
+        state.addresses.unshift({
+          id: 'a_' + Date.now(), label: state.newAddrLabel,
+          name: $('aName').value.trim(), phone: $('aPhone').value.trim(), address,
+          lat: state.newAddrCoords ? state.newAddrCoords.lat : null,
+          lng: state.newAddrCoords ? state.newAddrCoords.lng : null, active: true
+        });
+        saveJSON(ADDRS_KEY, state.addresses); updateTopAddr();
+        $('aAddress').value = ''; state.newAddrCoords = null;
+        $('addrSheet').classList.remove('open'); toast('Salgy saklandy ✓');
+        if (state.view === 'checkout') renderView(false);
+      });
+
+      // Product Sheet Events
+      $('productSheetBody').addEventListener('click', e => {
+        const to = e.target.closest('[data-toggle-opt]');
+        if (to) {
+          const p = PRODUCT_BY_ID[state.activeProductId];
+          const opt = p.options[+to.getAttribute('data-toggle-opt')];
+          if (state.selectedOpts.some(x => x.name === opt.name)) state.selectedOpts = state.selectedOpts.filter(x => x.name !== opt.name);
+          else state.selectedOpts.push(opt);
+          renderProductSheet(state.activeProductId); return;
+        }
+        if (e.target.id === 'pdAddBtn') {
+          addToCart(state.activeProductId, [...state.selectedOpts], 1);
+          $('productSheet').classList.remove('open'); toast('Sebede goşuldy ✓'); return;
+        }
+        const gs = e.target.closest('[data-sheet-store]');
+        if (gs) { $('productSheet').classList.remove('open'); go('store', gs.getAttribute('data-sheet-store')); }
+      });
+      $('productSheet').addEventListener('click', e => { if (e.target.id === 'productSheet') $('productSheet').classList.remove('open'); });
+
+      // Rating Sheet Events
+      $('starsPick').addEventListener('click', e => {
+        const b = e.target.closest('[data-star]'); if (!b) return;
+        state.rateStars = +b.getAttribute('data-star');
+        $('starsPick').querySelectorAll('button').forEach(x => x.classList.toggle('on', +x.getAttribute('data-star') <= state.rateStars));
+      });
+      $('closeRateBtn').addEventListener('click', () => $('rateSheet').classList.remove('open'));
+      $('submitRateBtn').addEventListener('click', async () => {
+        const o = ALL_ORDERS.find(x => x.code === state.rateOrderCode); if (!o) return;
+        const rev = { id: Date.now(), orderCode: o.code, storeId: o.storeId, customerName: o.customerName, rating: state.rateStars, comment: $('rateComment').value.trim(), reply: '', createdAt: Date.now() };
+        REVIEWS.unshift(rev); saveJSON(DB_REVIEWS_KEY, REVIEWS);
+        o.rated = true; saveJSON(DB_ORDERS_KEY, ALL_ORDERS);
+        if (sb) {
+          await sb.from('reviews').insert([{ order_code:rev.orderCode, store_id:rev.storeId, customer_name:rev.customerName, rating:rev.rating, comment:rev.comment }]);
+          await sb.from('orders').update({ rated: true }).eq('code', o.code);
+        }
+        $('rateSheet').classList.remove('open'); $('rateComment').value = '';
+        toast('Bahaňyz üçin sag boluň! ⭐'); renderView(false);
+      });
+
+      $('goOrdersAfterBtn').addEventListener('click', () => { $('successSheet').classList.remove('open'); goTab('orders'); });
+      $('successSheet').addEventListener('click', e => { if (e.target.id === 'successSheet') { $('successSheet').classList.remove('open'); goTab('orders'); } });
+
+      // Main View Delegated Events
+      $('appView').addEventListener('submit', e => { if (e.target.id === 'checkoutForm') { e.preventDefault(); submitOrder(); } });
+      $('appView').addEventListener('input', e => {
+        if (e.target.id === 'storeSearchInput') {
+          state.storeSearch = e.target.value; const pos = e.target.selectionStart; renderView(false);
+          const inp = $('storeSearchInput'); if (inp) { inp.focus(); inp.setSelectionRange(pos, pos); }
+        }
+      });
+
+      $('appView').addEventListener('click', e => {
+        const el = sel => e.target.closest(sel);
+        if (el('[data-fav]')) { e.stopPropagation(); const sid = el('[data-fav]').getAttribute('data-fav'); state.favs = state.favs.includes(sid) ? state.favs.filter(x => x !== sid) : [...state.favs, sid]; saveJSON(FAV_KEY, state.favs); renderView(false); return; }
+        if (el('[data-copy-coupon]')) { const c = el('[data-copy-coupon]').getAttribute('data-copy-coupon'); navigator.clipboard?.writeText(c); toast('Kupon göçürildi: ' + c); return; }
+        if (el('[data-quick-add]')) { addToCart(el('[data-quick-add]').getAttribute('data-quick-add'), [], 1); return; }
+        if (el('[data-quick-dec]')) { addToCart(el('[data-quick-dec]').getAttribute('data-quick-dec'), [], -1); return; }
+        if (el('[data-line-inc]')) { updateLineQty(el('[data-line-inc]').getAttribute('data-line-inc'), 1); return; }
+        if (el('[data-line-dec]')) { updateLineQty(el('[data-line-dec]').getAttribute('data-line-dec'), -1); return; }
+        if (el('[data-open-prod]')) { state.activeProductId = el('[data-open-prod]').getAttribute('data-open-prod'); state.selectedOpts = []; renderProductSheet(state.activeProductId); $('productSheet').classList.add('open'); return; }
+        if (el('[data-open-dept]')) { go('dept', el('[data-open-dept]').getAttribute('data-open-dept')); return; }
+        if (el('[data-open-type]')) { state.storeTypeFilter = el('[data-open-type]').getAttribute('data-open-type'); state.storeFilter = 'all'; goTab('stores'); return; }
+        if (el('[data-open-store]')) { go('store', el('[data-open-store]').getAttribute('data-open-store')); return; }
+        if (el('[data-type-filter]')) { state.storeTypeFilter = el('[data-type-filter]').getAttribute('data-type-filter'); renderView(false); return; }
+        if (el('[data-filter]')) { state.storeFilter = el('[data-filter]').getAttribute('data-filter'); renderView(false); return; }
+        if (el('[data-reset-filters]')) { state.storeTypeFilter = 'all'; state.storeFilter = 'all'; renderView(false); return; }
+        if (el('[data-store-cat]')) { state.storeCatFilter = el('[data-store-cat]').getAttribute('data-store-cat'); renderView(false); return; }
+        if (el('[data-store-tab]')) { state.storeTab = el('[data-store-tab]').getAttribute('data-store-tab'); renderView(false); return; }
+        if (el('[data-pay]')) { state.payMethod = el('[data-pay]').getAttribute('data-pay'); renderView(false); return; }
+        if (el('#checkoutGpsBtn')) { grabGps(() => renderView(false)); return; }
+        if (el('#applyCouponBtn')) {
+          const code = ($('couponInput').value || '').trim().toUpperCase();
+          const cp = COUPONS.find(x => x.code.toUpperCase() === code && x.active !== false);
+          if (!cp) { toast('Nädogry kupon kody'); return; }
+          state.appliedCoupon = cp; toast('Kupon ulanyldy: -' + cp.percent + '% 🎉'); renderView(false); return;
+        }
+        if (el('#removeCouponBtn')) { state.appliedCoupon = null; renderView(false); return; }
+        if (el('[data-rate-order]')) {
+          const o = ALL_ORDERS.find(x => x.code === el('[data-rate-order]').getAttribute('data-rate-order'));
+          if (o) { state.rateOrderCode = o.code; state.rateStars = 5; $('rateStoreName').textContent = o.storeName + ' (' + o.code + ')'; $('rateSheet').classList.add('open'); }
+          return;
+        }
+        if (el('[data-back]')) { back(); return; }
+        if (el('[data-go-stores]')) { state.storeTypeFilter = 'all'; state.storeFilter = 'all'; goTab('stores'); return; }
+        if (el('[data-checkout-all]')) { state.checkoutStoreId = null; go('checkout'); return; }
+        if (el('[data-cart-clear]')) { if (confirm('Sebet boşadylsynmy?')) { state.cart = {}; state.appliedCoupon = null; saveJSON(CART_KEY, {}); renderBottomNav(); renderView(false); } return; }
+        if (el('[data-reorder]')) {
+          const o = ALL_ORDERS.find(x => x.code === el('[data-reorder]').getAttribute('data-reorder'));
+          if (o) { o.items.forEach(it => { if (PRODUCT_BY_ID[it.id]) addToCart(it.id, it.options || [], it.qty); }); toast('Sebede goşuldy ✓'); goTab('cart'); }
+        }
+      });
+
+      
+      // v7 Extra Handlers (Theme, Voice Search, City, Compare, Support Ticket, Store Apply)
+      $('themeBtn').addEventListener('click', () => {
+        state.dark = !state.dark; document.body.classList.toggle('dark', state.dark);
+        localStorage.setItem('sm_dark_v7', state.dark ? '1' : '0');
+        $('themeBtn').textContent = state.dark ? '☀️' : '🌙';
+      });
+      $('themeBtn').textContent = state.dark ? '☀️' : '🌙';
+
+      $('voiceBtn').addEventListener('click', () => {
+        const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SR) { toast('Bu brauzerde sesli gözleg ýok'); return; }
+        const rec = new SR(); rec.lang = state.lang === 'ru' ? 'ru-RU' : 'tr-TR';
+        toast('🎙️ Gepläň...');
+        rec.onresult = e => {
+          const txt = e.results[0][0].transcript;
+          searchInput.value = txt; searchInput.dispatchEvent(new Event('input'));
+        };
+        rec.start();
+      });
+
+      $('closeTicketBtn').addEventListener('click', () => $('ticketSheet').classList.remove('open'));
+      $('submitTicketBtn').addEventListener('click', async () => {
+        const msg = $('tkMsg').value.trim(); if (!msg) { toast('Meseläni ýazyň'); return; }
+        const code = $('tkOrderCode').value;
+        const o = ALL_ORDERS.find(x => x.code === code) || {};
+        if (sb) await sb.from('support_tickets').insert([{ order_code:code, store_id:o.storeId||'', customer_name:o.customerName||'Müşderi', customer_phone:o.customerPhone||'', message:msg }]);
+        $('tkMsg').value = ''; $('ticketSheet').classList.remove('open'); toast('Goldaw bileti iberildi ✓');
+      });
+
+      $('closeCompareBtn').addEventListener('click', () => $('compareSheet').classList.remove('open'));
+      $('closeApplyBtn').addEventListener('click', () => $('applySheet').classList.remove('open'));
+      $('submitApplyBtn').addEventListener('click', async () => {
+        const nm = $('apName').value.trim(), em = $('apEmail').value.trim(), ph = $('apPhone').value.trim(), ct = $('apCity').value;
+        if (!nm || !em || !ph) { toast('Ähli meýdanlary dolduryň'); return; }
+        if (sb) await sb.from('store_applications').insert([{ store_name:nm, owner_email:em, phone:ph, city:ct, status:'pending' }]);
+        $('applySheet').classList.remove('open'); toast('Ýüz tutmaňyz kabul edildi! Admin tassyklamasyna garaşylýar ✓');
+      });
+
+      $('appView').addEventListener('click', e => {
+        const el = s => e.target.closest(s);
+        if (el('#cycleCityBtn')) { const cs=['Aşgabat','Mary','Türkmenabat','Balkanabat','Daşoguz']; state.city=cs[(cs.indexOf(state.city)+1)%cs.length]; localStorage.setItem('sm_city_v7',state.city); toast('Şäher: '+state.city); renderView(false); return; }
+        if (el('#nightFilterBtn')) { state.nightOnly=!state.nightOnly; toast(state.nightOnly?'🌙 Gije açyk dükanlar':'Ähli dükanlar'); renderView(false); return; }
+        if (el('#copyRefBtn')) { navigator.clipboard?.writeText(state.refCode); toast('Dost çagyryş kody göçürildi: '+state.refCode+' (+15 m.)'); return; }
+        if (el('#openApplyBtn')) { $('applySheet').classList.add('open'); return; }
+        if (el('#openCompareBtn')) {
+          const staples = PRODUCTS.filter(p => /süt|suw|çörek|ýumurtga|alma|palaw/i.test(p.title)).sort((a,b)=>a.price-b.price);
+          $('compareList').innerHTML = staples.map(p => { const s=STORE_BY_ID[p.storeId]||{name:'Dükan'}; return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--soft);border-radius:11px;"><div><b>'+esc(p.title)+'</b><div style="font-size:11px;color:var(--sub);">'+esc(s.name)+' • '+esc(p.unit)+'</div></div><strong style="color:var(--accent2);">'+fmt(p.price)+'</strong></div>'; }).join('');
+          $('compareSheet').classList.add('open'); return;
+        }
+        if (el('[data-otype]')) { state.orderType = el('[data-otype]').getAttribute('data-otype'); renderView(false); return; }
+        if (el('[data-tip]')) { state.courierTip = Number(el('[data-tip]').getAttribute('data-tip')); renderView(false); return; }
+        if (el('#cContactless')) { state.contactless = el('#cContactless').checked; return; }
+        if (el('#cDeposit')) { state.needDeposit = el('#cDeposit').checked; renderView(false); return; }
+        if (el('[data-ticket]')) { $('tkOrderCode').value = el('[data-ticket]').getAttribute('data-ticket'); $('ticketSheet').classList.add('open'); return; }
+      });
+
+      applyLangUI();
+      updateTopAddr();
+      renderBottomNav();
+      renderView(true);
+      syncFromSupabase();
+      startRealtime();
+    })();
+  </script>
+</body>
+</html>

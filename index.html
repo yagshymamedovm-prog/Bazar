@@ -340,8 +340,10 @@
       .hero h1,.hero p{max-width:60%}
     }
     @media(max-width:1023px){
-      .hero-art{display:none}
       .hero{padding:26px 22px}
+      .hero h1,.hero p{max-width:100%}
+      .hero-art{position:relative;right:auto;top:auto;transform:none;width:220px;height:180px;margin:18px auto 4px}
+      .hero-art-badge{left:50%;bottom:-6px;transform:translateX(-50%) rotate(-2deg);white-space:nowrap}
     }
     @media(max-width:480px){
       .app-main{padding:14px 14px calc(var(--nav-h) + env(safe-area-inset-bottom) + 92px)}
@@ -2341,79 +2343,38 @@ function renderSavedAddrList() {
       // Pin Harita Sürükleme
       // Gerçek İnteraktif Harita (Leaflet + OpenStreetMap)
       // ===== PROTOMAPS (PMTILES) + CLOUDFLARE R2 + MAPLIBRE (LAZY LOAD) =====
-      let pinMapObj = null, pinMarkerObj = null, mapLibsPromise = null, geoTimer = null;
+      // ===== GÜVENİLİR HARİTA (LEAFLET + CARTO — OTOMATİK YÜKLEME) =====
+      let pinMapObj = null, pinMarkerObj = null, pinTileObj = null, leafletPromise = null, geoTimer = null;
       const GEO_CACHE_KEY = 'sm_geo_cache_v1';
 
-      function ensureMapLibs() {
-        if (window.maplibregl && window.pmtiles) return Promise.resolve(true);
-        if (mapLibsPromise) return mapLibsPromise;
-        mapLibsPromise = new Promise((resolve, reject) => {
-          if (!document.getElementById('ml-css')) {
-            const lk = document.createElement('link');
-            lk.id = 'ml-css'; lk.rel = 'stylesheet';
-            lk.href = 'https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.css';
-            document.head.appendChild(lk);
-          }
-          const loadJs = src => new Promise((res, rej) => {
-            const s = document.createElement('script');
-            s.src = src; s.async = true; s.onload = res; s.onerror = rej;
-            document.head.appendChild(s);
-          });
-          Promise.all([
-            loadJs('https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js'),
-            loadJs('https://cdn.jsdelivr.net/npm/pmtiles@3.2.0/dist/pmtiles.js')
-          ]).then(() => {
-            if (!window.__pmRegistered && window.maplibregl && window.pmtiles) {
-              const proto = new window.pmtiles.Protocol();
-              window.maplibregl.addProtocol('pmtiles', proto.tile);
-              window.__pmRegistered = true;
-            }
-            resolve(true);
-          }).catch(reject);
-        });
-        return mapLibsPromise;
-      }
-
-      // Düşük internete uygun, sade ve hızlı Protomaps v4 vektör stili (Açık / Koyu)
-      function buildProtomapsStyle(pmUrl, isDark) {
-        const c = isDark ? {
-          bg:'#0f172a', water:'#172554', park:'#14332a', bldg:'#1e293b', bldgLine:'#334155',
-          road:'#334155', major:'#475569', hwy:'#0f766e', txt:'#e2e8f0', halo:'#0f172a'
-        } : {
-          bg:'#f3f4f6', water:'#bfdbfe', park:'#dcfce7', bldg:'#e5e7eb', bldgLine:'#d1d5db',
-          road:'#ffffff', major:'#fde68a', hwy:'#fb923c', txt:'#1e293b', halo:'#ffffff'
-        };
-        return {
-          version: 8,
-          glyphs: 'https://protomaps.github.io/basemaps-assets/fonts/{fontstack}/{range}.pbf',
-          sources: {
-            protomaps: {
-              type: 'vector',
-              url: 'pmtiles://' + pmUrl,
-              attribution: '© OpenStreetMap • Protomaps'
-            }
-          },
-          layers: [
-            { id:'bg', type:'background', paint:{ 'background-color': c.bg } },
-            { id:'landuse', type:'fill', source:'protomaps', 'source-layer':'landuse', filter:['in','pmap:kind','park','forest','garden','grass','nature_reserve'], paint:{ 'fill-color': c.park } },
-            { id:'water', type:'fill', source:'protomaps', 'source-layer':'water', paint:{ 'fill-color': c.water } },
-            { id:'buildings', type:'fill', source:'protomaps', 'source-layer':'buildings', minzoom:14, paint:{ 'fill-color': c.bldg, 'fill-outline-color': c.bldgLine } },
-            { id:'roads-minor', type:'line', source:'protomaps', 'source-layer':'roads', filter:['in','pmap:kind','minor_road','other','path'], layout:{ 'line-cap':'round', 'line-join':'round' }, paint:{ 'line-color': c.road, 'line-width':['interpolate',['linear'],['zoom'],12,1,16,5] } },
-            { id:'roads-major', type:'line', source:'protomaps', 'source-layer':'roads', filter:['in','pmap:kind','major_road','medium_road'], layout:{ 'line-cap':'round', 'line-join':'round' }, paint:{ 'line-color': c.major, 'line-width':['interpolate',['linear'],['zoom'],10,1.5,16,7] } },
-            { id:'roads-hwy', type:'line', source:'protomaps', 'source-layer':'roads', filter:['==','pmap:kind','highway'], layout:{ 'line-cap':'round', 'line-join':'round' }, paint:{ 'line-color': c.hwy, 'line-width':['interpolate',['linear'],['zoom'],8,1.5,16,9] } },
-            { id:'road-labels', type:'symbol', source:'protomaps', 'source-layer':'roads', minzoom:14, layout:{ 'symbol-placement':'line', 'text-field':['coalesce',['get','name:tr'],['get','name']], 'text-font':['Noto Sans Regular'], 'text-size':11 }, paint:{ 'text-color': c.txt, 'text-halo-color': c.halo, 'text-halo-width':1.5 } },
-            { id:'places', type:'symbol', source:'protomaps', 'source-layer':'places', layout:{ 'text-field':['coalesce',['get','name:tr'],['get','name']], 'text-font':['Noto Sans Medium'], 'text-size':['interpolate',['linear'],['zoom'],8,11,14,14] }, paint:{ 'text-color': c.txt, 'text-halo-color': c.halo, 'text-halo-width':1.8 } }
-          ]
-        };
-      }
-
-      function getActiveMapStyle() {
-        if (CONFIG.PMTILES_URL) return buildProtomapsStyle(CONFIG.PMTILES_URL, state.dark);
-        return 'https://tiles.openfreemap.org/styles/liberty';
+      function getMapTileUrl() {
+        return state.dark
+          ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+          : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
       }
 
       function updateMapTheme() {
-        if (pinMapObj && CONFIG.PMTILES_URL) pinMapObj.setStyle(getActiveMapStyle());
+        if (pinTileObj) pinTileObj.setUrl(getMapTileUrl());
+      }
+
+      function ensureLeaflet() {
+        if (window.L) return Promise.resolve(true);
+        if (leafletPromise) return leafletPromise;
+        leafletPromise = new Promise((resolve, reject) => {
+          if (!document.getElementById('lf-css')) {
+            const lk = document.createElement('link');
+            lk.id = 'lf-css'; lk.rel = 'stylesheet';
+            lk.href = 'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css';
+            document.head.appendChild(lk);
+          }
+          const s = document.createElement('script');
+          s.src = 'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js';
+          s.async = true;
+          s.onload = () => resolve(true);
+          s.onerror = reject;
+          document.head.appendChild(s);
+        });
+        return leafletPromise;
       }
 
       function updatePinCoords(lat, lng, doReverse) {
@@ -2434,8 +2395,7 @@ function renderSavedAddrList() {
             return;
           }
           try {
-            const baseGeo = CONFIG.GEOCODER_URL || 'https://nominatim.openstreetmap.org/reverse';
-            const r = await fetch(baseGeo + '?format=json&lat=' + state.pinDraftLat + '&lon=' + state.pinDraftLng + '&accept-language=tr');
+            const r = await fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat=' + state.pinDraftLat + '&lon=' + state.pinDraftLng + '&accept-language=tr');
             if (!r.ok) return;
             const j = await r.json(), ad = j.address || {};
             const rawCity = ad.city || ad.province || ad.town || ad.state || ad.county || '';
@@ -2449,7 +2409,7 @@ function renderSavedAddrList() {
             if (ks.length > 60) delete cache[ks[0]];
             saveJSON(GEO_CACHE_KEY, cache);
           } catch {}
-        }, 550);
+        }, 500);
       }
 
       async function syncPinMap(lat, lng) {
@@ -2458,38 +2418,30 @@ function renderSavedAddrList() {
         const useLng = Number(lng || state.gpsLng || state.pinDraftLng || 58.3261);
         if (!pinMapObj) {
           box.innerHTML = '<div style="height:100%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--sub);">Harita yükleniyor...</div>';
-          try { await ensureMapLibs(); } catch {
-            box.innerHTML = '<div style="height:100%;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--sub);padding:12px;text-align:center;">Harita yüklenemedi — adresinizi elle yazabilirsiniz.</div>';
+          try { await ensureLeaflet(); } catch {
+            box.innerHTML = '<div style="height:100%;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--sub);padding:12px;text-align:center;">Harita yüklenemedi — internet bağlantınızı kontrol edin.</div>';
             return;
           }
           box.innerHTML = '';
-          pinMapObj = new window.maplibregl.Map({
-            container: box,
-            style: getActiveMapStyle(),
-            center: [useLng, useLat],
-            zoom: 15.5,
-            attributionControl: false
-          });
-          pinMapObj.addControl(new window.maplibregl.NavigationControl({ showCompass: false }), 'top-right');
-          const wrap = document.createElement('div');
-          wrap.innerHTML = '<div class="sarga-pin"></div>';
-          pinMarkerObj = new window.maplibregl.Marker({ element: wrap, draggable: true, anchor: 'bottom' })
-            .setLngLat([useLng, useLat])
-            .addTo(pinMapObj);
+          pinMapObj = window.L.map(box, { zoomControl: true, attributionControl: true }).setView([useLat, useLng], 16);
+          pinMapObj.attributionControl.setPrefix(false);
+          pinTileObj = window.L.tileLayer(getMapTileUrl(), { subdomains: 'abcd', maxZoom: 20, attribution: '© OSM © CARTO' }).addTo(pinMapObj);
+          const pinIcon = window.L.divIcon({ className: '', html: '<div class="sarga-pin"></div>', iconSize: [28, 28], iconAnchor: [14, 28] });
+          pinMarkerObj = window.L.marker([useLat, useLng], { draggable: true, icon: pinIcon }).addTo(pinMapObj);
           pinMarkerObj.on('dragend', () => {
-            const p = pinMarkerObj.getLngLat();
+            const p = pinMarkerObj.getLatLng();
             updatePinCoords(p.lat, p.lng, true);
           });
           pinMapObj.on('click', ev => {
-            pinMarkerObj.setLngLat(ev.lngLat);
-            updatePinCoords(ev.lngLat.lat, ev.lngLat.lng, true);
+            pinMarkerObj.setLngLat ? pinMarkerObj.setLngLat(ev.latlng) : pinMarkerObj.setLatLng(ev.latlng);
+            updatePinCoords(ev.latlng.lat, ev.latlng.lng, true);
           });
         } else {
-          pinMapObj.jumpTo({ center: [useLng, useLat], zoom: Math.max(pinMapObj.getZoom(), 15.5) });
-          pinMarkerObj.setLngLat([useLng, useLat]);
+          pinMapObj.setView([useLat, useLng], Math.max(pinMapObj.getZoom(), 16));
+          pinMarkerObj.setLatLng([useLat, useLng]);
         }
         updatePinCoords(useLat, useLng, false);
-        setTimeout(() => { if (pinMapObj) pinMapObj.resize(); }, 200);
+        setTimeout(() => { if (pinMapObj) pinMapObj.invalidateSize(); }, 220);
       }
 
       // Kompaktlaşan Üst Başlık + Pull-to-Refresh + Bağlantı Koptu Şeridi + PWA
